@@ -19,6 +19,7 @@ ADRs are authoritative; this is the quick index.
 | ADR-013 | Internal CRM model and `CRMProvider` adapters | Accepted |
 | ADR-014 | MVP support public-only; authenticated support in V1 | Accepted |
 | ADR-015 | Tenant-ready shared schema without SaaS operations | Accepted |
+| ADR-016 | Postgres contention mitigation (OLTP + vector + FTS + jobs) | Accepted |
 
 ## Product decisions
 
