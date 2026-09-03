@@ -27,6 +27,7 @@ The model never produces code. It produces a descriptor validated by `packages/c
 - No arbitrary icon name, class, CSS, URL, HTML, event handler or component import from model data.
 - Record cards resolve public/read models by ID; model text cannot override canonical title/price/result.
 - Actions use opaque, signed, expiring server IDs bound to conversation/actor/operation and confirmation policy.
+- Every action ID referenced inside a component's `data` must also appear in the descriptor's root `actionIds`; this is a second-pass check (`packages/contracts/validate-generative-ui.mjs`) run after schema validation, since plain JSON Schema cannot express a nested-field-vs-sibling-array constraint. Reject the descriptor if the check fails.
 - Maximum one dominant card and two supporting cards per turn; mobile cards are full available width and never nested carousels.
 - Every component includes loading, empty, error, expired, offline/resume, keyboard, screen-reader and reduced-motion states.
 - Analytics use schema-defined keys and exclude free text/PII.
