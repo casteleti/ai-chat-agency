@@ -21,6 +21,7 @@
 | layered memory | memory claims/context engine | G2,G5,G7 | relevance/retention/correction | source/confidence/authorization |
 | model cost routing/fallback | Model router | G5,G15 | route/fallback/cost | approved task matrix, recorded |
 | prompt/tool AI security | trust zones/policy executor | G5,G16 | injection/tool auth | unauthorized execution 0 |
+| resource authorization / IDOR | resource-scoped repository queries/RLS | G2,G3 | repo/API/RAG/cache IDOR tests | cross-resource 0 |
 | analytics/commercial signals | owned events/views | G15 | schema/dedupe/consent | MBC/funnel reproducible |
 | AI observability/reproducibility | OTel/Langfuse/versioning | G5,G15 | trace/redaction/version | each run explainable |
 | files secure V1-ready | R2 metadata/policy | architecture; V1 gate later | schema/threat spec | disabled MVP; complete controls |

@@ -21,6 +21,7 @@ Tests are colocated for package units/integration where useful; cross-system sui
 | intent | macro accuracy ≥95%; support/new-business recall ≥97% |
 | structured output | valid ≥99%; invalid never persists/executes |
 | tool authorization | 100%; forbidden execution 0 |
+| resource authorization / IDOR | 0 cross-resource results across API/repository/RAG/cache |
 | fabricated case/price/booking/ticket | 0 |
 | qualification | formula exact 100%; labeled band ≥95%; unknown handling 100% |
 | support | SEV-1 recall 100%, severity/category macro F1 ≥0.93 |
