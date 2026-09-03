@@ -23,7 +23,13 @@ AI extracts evidence; software computes. Each dimension receives 0–5, evidence
 | Engagement/evidence quality | 5 | responsive, coherent, correctable evidence |
 | Operational/data maturity | 10 | enough foundation to achieve value |
 
-`weightedScore = Σ(score/5 × weight)` over known dimensions. `coverage = knownWeight/100`. `confidence = weighted evidence confidence / knownWeight`. Displayed score requires coverage ≥60%; otherwise show “insufficient context.” Thresholds: 75–100 `PRIORITY`; 55–74 `QUALIFIED`; 35–54 `NURTURE`; <35 `LOW_FIT`. A hard disqualifier (illegal/unethical request, unavailable geography/capability, incompatible minimum) overrides. A human request is always honored but does not change the score.
+`weightedScore = Σ(score/5 × weight)` over known dimensions. `coverage = knownWeight/100`. `confidence = weighted evidence confidence / knownWeight`. Displayed score requires coverage ≥60%; otherwise show “insufficient context.” Thresholds: 75–100 `PRIORITY`; 55–74 `QUALIFIED`; 35–54 `NURTURE`; <35 `LOW_FIT`. A hard disqualifier overrides and is evaluable as a single fact as soon as it is stated (it does not require dimension coverage). Each of the three categories is a config-backed, deterministic check, not a free-form judgment call:
+
+- **Illegal/unethical request**: matches a configured denylist of request categories (`app_settings.settings.qualification.disallowedRequestCategories`), not open-ended model discretion.
+- **Unavailable geography/capability**: company geography is outside `app_settings.settings.qualification.servedGeographies`, or the stated need has no matching entry in the approved services catalog (the same canonical record set `relatedServiceIds` references) -- i.e. "unavailable capability" means "no approved service fits," reusing the existing services catalog rather than a second list.
+- **Incompatible minimum**: the captured `budget range/readiness` field falls below `app_settings.settings.qualification.minimumBudgetBand`, when one has been configured.
+
+`servedGeographies`, `disallowedRequestCategories` and `minimumBudgetBand` are business decisions the agency sets, versioned the same way as the dimension weights below; this document does not hardcode their values -- if unconfigured, there is no geography/budget hard disqualifier (illegal/unethical requests still deny by the request-category denylist default, not an empty list). A human request is always honored but does not change the score.
 
 Recommendations combine band, confidence, urgency and user preference: priority → meeting/handoff; qualified → meeting; nurture → useful resource/follow-up; low fit → honest alternative. Scores/weights are tenant-configured and versioned; every result stores algorithm version.
 

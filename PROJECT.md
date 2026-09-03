@@ -123,3 +123,9 @@ Commercial targets are baselines, not release gates: chat open-to-start ≥35%, 
 - Client configuration: tenant settings, identity, visual tokens, enabled capabilities, retention, routing.
 
 Any change to MVP/V1/V2 boundaries requires an update here and a decision entry; code or tickets do not override this file.
+
+## Open product decision: qualification hard-disqualifier values
+
+`docs/product/briefing-qualification-opportunity.md` defines hard-disqualifier qualification as a config-driven check against three agency-level keys: `app_settings.settings.qualification.servedGeographies`, `.disallowedRequestCategories`, and `.minimumBudgetBand` (`docs/database/schema.sql`'s single-row `app_settings.settings` jsonb column). The mechanism and its wiring are specified and implementable as-is.
+
+**No actual values exist for these three keys anywhere in this repository** (no served-country list, no request-category denylist, no minimum-budget figure, in any doc, seed file, or schema default). This is a **product decision blocker, not a technical one**: the agency owner must define which geographies are served, what request categories are automatically declined, and what the minimum qualifying budget band is (if any) before G8 (qualification) can ship with this check active. Until set, the system simply has no geography/budget hard disqualifier (the illegal/unethical-request denylist still applies via its own default, per `briefing-qualification-opportunity.md`) — the system remains safe to build and deploy without these values, but qualification accuracy for those two categories is incomplete until they are supplied.
