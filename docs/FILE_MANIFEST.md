@@ -54,7 +54,8 @@ Every ADR contains status, context, decision, alternatives, consequences and ris
 | `docs/adr/ADR-012-generative-ui.md` | schema/registry/action IDs | G1/G9 |
 | `docs/adr/ADR-013-crm-abstraction.md` | canonical CRM/provider adapter | G10 |
 | `docs/adr/ADR-014-support-boundary.md` | public MVP/private V1 | G12 |
-| `docs/adr/ADR-015-multitenancy.md` | tenant-ready shared schema | G2/G3 |
+| `docs/adr/ADR-015-multitenancy.md` | tenant-ready shared schema (superseded by ADR-017) | G2/G3 |
+| `docs/adr/ADR-017-single-tenant-confirmation.md` | single-tenant by decision; supersedes ADR-015 | G2/G3 |
 
 ## Product files
 

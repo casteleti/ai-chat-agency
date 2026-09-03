@@ -2,15 +2,15 @@
 
 ## Objective
 
-Create the tenant-safe transactional persistence foundation and durable job/event mechanics.
+Create the transactional persistence foundation and durable job/event mechanics.
 
 ## Read First
 
-G1 evidence, ADR-004/006/010/015, `docs/database/*`, events/resilience, retention.
+G1 evidence, ADR-004/006/010/017, `docs/database/*`, events/resilience, retention.
 
 ## Scope
 
-Implement Drizzle schema for conceptual tables needed through MVP, PostgreSQL extensions/constraints/indexes/RLS defense, repository transaction primitives, TenantContext, migrations, idempotency store, outbox/consumer receipts, pg-boss bootstrap/worker lifecycle, deterministic seeds and DB test factories. Defer V1-only tables only if migrations preserve named contracts and gate documents record them.
+Implement Drizzle schema for conceptual tables needed through MVP, PostgreSQL extensions/constraints/indexes/RLS defense, repository transaction primitives, migrations, idempotency store, outbox/consumer receipts, pg-boss bootstrap/worker lifecycle, deterministic seeds and DB test factories. Defer V1-only tables only if migrations preserve named contracts and gate documents record them.
 
 ## Files
 
@@ -18,15 +18,15 @@ Implement Drizzle schema for conceptual tables needed through MVP, PostgreSQL ex
 
 ## Constraints
 
-Composite tenant relationships; UUIDv7; timestamptz; JSON schemaVersion; money invariant; no optional tenant. App and migrator DB roles separate. Redis not durable. Migration forward-only.
+UUIDv7; timestamptz; JSON schemaVersion; money invariant. App and migrator DB roles separate. Redis not durable. Migration forward-only.
 
 ## Tests/Commands
 
-Clean/previous migration, seed rerun, tenant A/B isolation/repository/RLS, FK/check/unique, transaction rollback, idempotency body conflict, outbox atomicity, duplicate consumer, worker crash/lease. `pnpm db:migrate db:seed db:check test:integration verify`.
+Clean/previous migration, seed rerun, repository/RLS, FK/check/unique, transaction rollback, idempotency body conflict, outbox atomicity, duplicate consumer, worker crash/lease. `pnpm db:migrate db:seed db:check test:integration verify`.
 
 ## Acceptance Criteria
 
-Schema matches blueprint or documented accepted decision; zero cross-tenant reads; important write+outbox atomic; job replay safe; migrations validated clean and upgrade; EXPLAIN evidence for core access paths.
+Schema matches blueprint or documented accepted decision; important write+outbox atomic; job replay safe; migrations validated clean and upgrade; EXPLAIN evidence for core access paths.
 
 ## Completion Report
 

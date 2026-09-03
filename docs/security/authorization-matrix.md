@@ -4,7 +4,7 @@ Legend: `C` create, `R` read, `U` update, `X` execute/action, `A` administer, `o
 
 | Resource/action | Anonymous | Verified lead | Client user (V1) | Sales | Support | Knowledge editor | Admin/Owner |
 |---|---|---|---|---|---|---|---|
-| public conversation | CRU own | CRU own/linked | CRU own | R/U assigned | R/U support assigned | no default | A tenant |
+| public conversation | CRU own | CRU own/linked | CRU own | R/U assigned | R/U support assigned | no default | A |
 | private conversation | — | — | R own/account allowed | R assigned commercial | R assigned support | — | R/A audited |
 | briefing/opportunity map | CRU own | CRU own | R own if shared | CRU assigned | R when handoff | — | A |
 | lead/contact/company | — until consent/verification | R/U limited own | R own profile only | CRU assigned | R only support need | — | A |
@@ -19,8 +19,8 @@ Legend: `C` create, `R` read, `U` update, `X` execute/action, `A` administer, `o
 | prompt/agent version | — | — | — | R published metadata only | R published metadata only | R/draft role if granted | A/publish with eval |
 | tools | allowlisted public/own | allowlisted own | allowlisted resource | assigned capability | assigned capability | knowledge-only | policy/admin, no bypass |
 | integrations/credentials | — | — | — | health only | health only | — | config; secret value never read back |
-| analytics | — | — | own service status only | commercial aggregates | support aggregates | knowledge quality | tenant aggregates |
+| analytics | — | — | own service status only | commercial aggregates | support aggregates | knowledge quality | agency aggregates |
 | audit log | — | — | own access summary by privacy process | limited relevant | limited relevant | publish actions | restricted Admin/Owner/security |
 | flags/settings/users/roles | — | — | — | — | — | — | A; owner-only for security roles |
 
-Every permission is also constrained by tenant, resource relationship, current state, feature flag, consent/purpose, risk and confirmation. UI visibility is not authorization. Unauthorized and non-existent private resources use an enumeration-safe response.
+Every permission is also constrained by resource relationship, current state, feature flag, consent/purpose, risk and confirmation. UI visibility is not authorization. Unauthorized and non-existent private resources use an enumeration-safe response.

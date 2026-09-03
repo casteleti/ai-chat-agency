@@ -32,20 +32,20 @@ The API is the only public origin application. The worker never exposes a public
 - Integrations: provider interfaces, mappings, webhook inbox, sync jobs.
 - Experience: Generative UI schema, renderer registry, website context.
 - Analytics/quality: domain outbox, product events, feedback, evaluations, cost and performance.
-- Administration/configuration: tenant settings, feature flags, prompt publishing, audit views.
+- Administration/configuration: agency settings, feature flags, prompt publishing, audit views.
 
 Contexts call exported application services or ports; they do not import another context's repository implementation or tables. Cross-context side effects use a transactionally written outbox event.
 
 ## Request lifecycle
 
 1. Cloudflare applies TLS, WAF, bot controls, Turnstile where challenged, and coarse IP limits.
-2. Fastify resolves request ID, tenant, signed anonymous or authenticated identity, consent, locale, and rate bucket.
+2. Fastify resolves request ID, signed anonymous or authenticated identity, consent, locale, and rate bucket.
 3. Conversation service stores the user message and an outbox event in one transaction.
 4. Policy engine builds allowed capabilities for this identity/resource/state.
 5. Context engine assembles ordered, budgeted, provenance-tagged context.
 6. Model router selects a pinned task tier. Prompt composer loads published immutable prompt and agent versions.
 7. Model gateway streams text/structured proposals. All structured output is Zod-validated.
-8. Tool proposals pass schema, tenant, identity, resource, policy, risk, confirmation, idempotency, timeout, and audit checks before execution.
+8. Tool proposals pass schema, identity, resource, policy, risk, confirmation, idempotency, timeout, and audit checks before execution.
 9. Approved UI descriptors pass the Generative UI schema and renderer allowlist.
 10. The assistant message, state patch, usage, citations, tool results, and outbox events persist before completion.
 11. SSE resumes from a server event cursor after transient disconnects.
@@ -56,7 +56,7 @@ Externally, use versioned REST JSON under `/v1` plus `text/event-stream` for mes
 
 ## Data
 
-PostgreSQL 18.6 is the source of truth. Every tenant-owned row has non-null `tenant_id`; repositories require a `TenantContext`; composite tenant indexes and foreign keys prevent accidental cross-tenant joins. Row-level security is defense-in-depth for the most sensitive tables, not a substitute for repository scoping.
+PostgreSQL 18.6 is the source of truth. The system is single-tenant by decision (ADR-017): no `tenant_id` column, no `TenantContext`, no composite tenant keys. Row-level security remains defense-in-depth for the most sensitive tables — separating staff-authenticated database roles from anonymous/application access — not a substitute for resource-level repository authorization, and not a tenant boundary.
 
 Use UUIDv7 identifiers, `timestamptz` UTC timestamps, money as integer minor units plus ISO currency, JSONB only for versioned flexible payloads, and optimistic version columns for user-editable aggregates. Drizzle owns schema and forward migrations. Raw SQL is allowed for pgvector, FTS, RLS, constraints, views, and performance-critical queries with tests.
 
@@ -70,13 +70,13 @@ The model can interpret, extract, summarize, retrieve, propose questions, diagno
 
 ## Knowledge and memory
 
-Knowledge uses versioned documents, semantic chunks, PostgreSQL FTS, pgvector cosine HNSW, Reciprocal Rank Fusion, optional reranking, mandatory tenant/visibility/effective-date filters, and returned citations. A retrieval result is untrusted content and never becomes instruction text.
+Knowledge uses versioned documents, semantic chunks, PostgreSQL FTS, pgvector cosine HNSW, Reciprocal Rank Fusion, optional reranking, mandatory visibility/effective-date filters, and returned citations. A retrieval result is untrusted content and never becomes instruction text.
 
 Memory layers are working context, conversation summary, visitor/contact/company memory, client/account/project memory, and published knowledge. Stored memories are typed claims with source, confidence, sensitivity, timestamps, and expiry. Context assembly retrieves only intent-relevant authorized records.
 
 ## Auth and authorization
 
-Anonymous public chat uses an HttpOnly, Secure, SameSite=Lax signed session cookie bound to a server-side visitor session; it is not an authenticated person. Better Auth provides staff and V1 client magic-link/OTP sessions. Roles are `CLIENT_USER`, `SALES`, `SUPPORT`, `KNOWLEDGE_EDITOR`, `ADMIN`, `OWNER`, with resource ownership/tenant policies. Service-to-service calls use workload credentials, not user tokens.
+Anonymous public chat uses an HttpOnly, Secure, SameSite=Lax signed session cookie bound to a server-side visitor session; it is not an authenticated person. Better Auth provides staff and V1 client magic-link/OTP sessions. Roles are `CLIENT_USER`, `SALES`, `SUPPORT`, `KNOWLEDGE_EDITOR`, `ADMIN`, `OWNER`, with resource ownership policies. Service-to-service calls use workload credentials, not user tokens.
 
 ## Providers
 
@@ -92,13 +92,12 @@ Cloudflare DNS/CDN/WAF → Hetzner origin firewall → Caddy → web/admin/api c
 
 ## Non-negotiable invariants
 
-1. No tenant-owned query without tenant scope.
-2. No private client data before authenticated resource authorization.
-3. No side-effecting tool executes solely because a model requested it.
-4. No case, price, meeting, ticket, or integration success is claimed without a persisted tool result.
-5. No arbitrary model-generated frontend code.
-6. No important write without idempotency and audit.
-7. No production prompt or agent configuration without an immutable published version.
-8. No gate completes with failing required checks.
+1. No private client data before authenticated resource authorization.
+2. No side-effecting tool executes solely because a model requested it.
+3. No case, price, meeting, ticket, or integration success is claimed without a persisted tool result.
+4. No arbitrary model-generated frontend code.
+5. No important write without idempotency and audit.
+6. No production prompt or agent configuration without an immutable published version.
+7. No gate completes with failing required checks.
 
 Deeper specifications are authoritative for their concern but may not contradict this file. Resolve conflicts in favor of `PROJECT.md` for scope and this file for architecture, then record a decision.
