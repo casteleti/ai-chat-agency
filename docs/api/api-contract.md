@@ -33,6 +33,8 @@ Better Auth endpoints are mounted under `/v1/auth/*` per generated/locked adapte
 
 `run.started`, `response.delta`, `response.completed`, `progress.updated`, `ui.component`, `tool.pending_confirmation`, `tool.started`, `tool.completed`, `tool.failed`, `run.failed`, `heartbeat`. Each includes monotonically increasing event ID, run ID, timestamp and schema version. The persisted final message is authoritative; deltas may be discarded after completion.
 
+These are a distinct, lighter-weight category from the internal outbox/domain event envelope (`packages/contracts/event-envelope.schema.json`, e.g. `handoff.requested.v1`): SSE event type names validate against that file's `$defs/SseEventType` (no `.vN` suffix; versioning is carried by the event's own `schemaVersion` field), never against the envelope's own `type` pattern, and SSE events are never persisted as outbox rows.
+
 ## Error envelope
 
 ```json

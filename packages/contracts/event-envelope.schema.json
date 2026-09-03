@@ -1,12 +1,20 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://concierge.example/schemas/event-envelope.v1.json",
+  "$comment": "This envelope is for internal outbox/domain events only (docs/architecture/events-and-resilience.md's Canonical events table, e.g. conversation.started.v1). SSE stream event types (docs/api/api-contract.md's SSE event types: run.started, response.delta, heartbeat, etc.) are a separate, lighter-weight, non-versioned category -- see $defs/SseEventType -- and are never instances of this envelope.",
+  "$defs": {
+    "SseEventType": {
+      "type": "string",
+      "pattern": "^[a-z]+(\\.[a-z_]+)*$",
+      "description": "Dot-separated lowercase segments, no version suffix (SSE event schema versioning is carried by the event's own schemaVersion field per api-contract.md, not encoded in the type name). Matches the full SSE catalog: run.started, response.delta, response.completed, progress.updated, ui.component, tool.pending_confirmation, tool.started, tool.completed, tool.failed, run.failed, heartbeat."
+    }
+  },
   "type": "object",
   "additionalProperties": false,
   "required": ["id", "type", "schemaVersion", "tenantId", "aggregateType", "aggregateId", "occurredAt", "actor", "requestId", "correlationId", "payload", "sensitivity"],
   "properties": {
     "id": {"type": "string", "format": "uuid"},
-    "type": {"type": "string", "pattern": "^[a-z]+(\\.[a-z_]+)+\\.v[1-9][0-9]*$"},
+    "type": {"type": "string", "pattern": "^[a-z]+(\\.[a-z_]+)+\\.v[1-9][0-9]*$", "description": "Outbox/domain event type only (e.g. handoff.requested.v1). Do not use for SSE stream event names -- see the top-level $comment and $defs/SseEventType."},
     "schemaVersion": {"type": "integer", "minimum": 1},
     "tenantId": {"type": "string", "format": "uuid"},
     "aggregateType": {"type": "string"},
