@@ -79,7 +79,7 @@ Every ADR contains status, context, decision, alternatives, consequences and ris
 | `docs/agents/handoff-agent.md` | package/facts/hypotheses/routing/evals | handoff | G13 |
 | `packages/ai/prompts/README.md` | composition/version/publish/eval architecture | AI security | G5 |
 | `packages/ai/prompts/global-system.md` | global purpose/trust/non-fabrication/output rules | prompt architecture | G5 |
-| `packages/ai/prompts/brand-personality.md` | concise strategic tenant voice baseline | brand principles | G5 |
+| `packages/ai/prompts/brand-personality.md` | concise strategic agency voice baseline | brand principles | G5 |
 | `packages/ai/prompts/concierge.md` | role routing/open-thread/clarification behavior | concierge spec | G5 |
 | `packages/ai/prompts/new-business.md` | problem-first adaptive discovery | new-business spec | G7 |
 | `packages/ai/prompts/support.md` | support classification/private boundary | support spec | G12 |
@@ -129,7 +129,7 @@ Every ADR contains status, context, decision, alternatives, consequences and ris
 | `docs/security/ai-security.md` | trust hierarchy, output/tool controls and red-team families | AI/tool architecture | G5/G16 |
 | `docs/security/uploads-rate-audit.md` | V1 upload pipeline/limits, route limits, audit fields/immutability | security/data | G3/G16/V1 |
 | `docs/security/lgpd.md` | purposes/bases/minimization/rights/processors/consent/incidents | privacy/legal review | G3/G16/G17 |
-| `docs/security/authorization-matrix.md` | roles/resources/actions plus tenant/state/consent constraints | identity/domains | G3/G14 |
+| `docs/security/authorization-matrix.md` | roles/resources/actions plus state/consent constraints | identity/domains | G3/G14 |
 
 ## Testing, analytics and matrices
 
@@ -172,7 +172,7 @@ All gate files contain objective, read-first, scope, exact file groups, constrai
 | `docs/codex/COMPLETION_REPORT_TEMPLATE.md` | exact non-vague report format |
 | `docs/codex/G0-repository-foundation.md` | monorepo/tooling/CI skeleton |
 | `docs/codex/G1-contracts-configuration.md` | executable schemas/config/errors |
-| `docs/codex/G2-database-outbox.md` | data/migrations/tenant/jobs |
+| `docs/codex/G2-database-outbox.md` | data/migrations/jobs |
 | `docs/codex/G3-identity-consent-policy.md` | sessions/auth/consent/authz |
 | `docs/codex/G4-conversation-streaming.md` | message/state/SSE/resume |
 | `docs/codex/G5-ai-orchestration.md` | model/context/prompts/policy/tools |
@@ -203,7 +203,7 @@ Exact domain internals may split only within these locked groups; exported contr
 |---|---|
 | G0 | root pnpm/Turbo/TS/lint/format configs and lock; manifests/entrypoints for `apps/{web,admin,api,worker}` and every package in intended tree; `.github`; dev/test Compose; hierarchical AGENTS |
 | G1 | `packages/contracts/src/{api,events,ai,tools,ui,errors,providers,ids}.ts`; config schemas/loaders/flags; generators/tests |
-| G2 | database `schema/*`, `migrations/*`, repositories/transaction/tenant context/seeds; events/outbox/pg-boss handlers/tests |
+| G2 | database `schema/*`, `migrations/*`, repositories/transaction/seeds; events/outbox/pg-boss handlers/tests |
 | G3 | identity domain/repos; security session/authz/CSRF/rate/redaction; API plugins/routes and auth UI/tests |
 | G4 | conversation domain/repos/services/state; API routes/SSE; web workspace store/shell; fake run engine/tests |
 | G5 | AI gateway/providers/router/context/prompt/orchestrator; policy registry/executor; telemetry/eval harness |

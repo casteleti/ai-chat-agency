@@ -34,7 +34,7 @@ ADRs are authoritative; this is the quick index.
 | WhatsApp | Not primary CTA; continuity/handoff in V1 |
 | Website audit | URL-only, SSRF-safe, preliminary, bounded |
 | Pricing/cases | Only from approved knowledge/tool records |
-| Productization | Generic core and tenant IDs now; provisioning/billing/white-label later |
+| Productization | Not planned (ADR-017); single-tenant, no provisioning/billing/white-label |
 
 ## Change rule
 

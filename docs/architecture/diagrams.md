@@ -29,7 +29,7 @@ sequenceDiagram
   participant M as Model
   participant T as Tool policy
   U->>A: Message + idempotency key
-  A->>O: Identity, tenant, state
+  A->>O: Identity, state
   O->>O: Build authorized context
   O->>M: Versioned prompt + tools
   M-->>O: Text / structured proposal
@@ -108,7 +108,7 @@ flowchart LR
   CHUNK --> IDX["Embedding + FTS"]
   Q[Query] --> HYB["Vector + lexical"]
   IDX --> HYB
-  HYB --> FILTER["Tenant / visibility / date"]
+  HYB --> FILTER["Visibility / date"]
   FILTER --> RERANK[Rerank]
   RERANK --> CITE["Context + citations"]
 ```

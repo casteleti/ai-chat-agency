@@ -20,4 +20,4 @@ Error budget burn alerts at 2× over 1 h and 1× over 6 h; feature rollout pause
 
 ## Dashboard panels
 
-Traffic/request/error/latency/SSE; app CPU/memory/event loop; DB connections/locks/replication/backups/slow queries; Redis health; queue depth/age/retries/dead letters; provider health/fallback; AI TTFT/latency/tokens/cost/schema; RAG latency/zero-results/citation; tool confirmations/denials/failures; funnel/MBC/meetings/handoffs/support; security limits/auth/SSRF/upload/tenant canary. Every panel filters environment/tenant/version without exposing content.
+Traffic/request/error/latency/SSE; app CPU/memory/event loop; DB connections/locks/replication/backups/slow queries; Redis health; queue depth/age/retries/dead letters; provider health/fallback; AI TTFT/latency/tokens/cost/schema; RAG latency/zero-results/citation; tool confirmations/denials/failures; funnel/MBC/meetings/handoffs/support; security limits/auth/SSRF/upload canary. Every panel filters environment/version without exposing content.

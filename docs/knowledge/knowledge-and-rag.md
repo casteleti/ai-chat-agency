@@ -2,7 +2,7 @@
 
 ## Taxonomy
 
-Required metadata: `tenantId`, `documentKey`, `version`, `type`, `locale`, `visibility`, `title`, `serviceIds`, `industries`, `audiences`, `tags`, `validFrom`, `validUntil`, `sourceType`, `sourceUri`, `owner`, `reviewer`, `contentHash`, `publishedAt`.
+Required metadata: `documentKey`, `version`, `type`, `locale`, `visibility`, `title`, `serviceIds`, `industries`, `audiences`, `tags`, `validFrom`, `validUntil`, `sourceType`, `sourceUri`, `owner`, `reviewer`, `contentHash`, `publishedAt`.
 
 Types: `SERVICE`, `CASE_STUDY`, `FAQ`, `METHOD`, `POLICY`, `SUPPORT`, `ONBOARDING`, `TECHNOLOGY`, `PRICING_RULE`, `BRAND`, `TEAM`, `PROCESS`. Visibility: `PUBLIC`, `PROSPECT`, `CLIENT`, `PROJECT`, `STAFF`. Pricing is rules/approved records, never prose inference.
 
@@ -19,7 +19,7 @@ Types: `SERVICE`, `CASE_STUDY`, `FAQ`, `METHOD`, `POLICY`, `SUPPORT`, `ONBOARDIN
 
 ## Retrieval
 
-Normalize/query-expand from current intent and key entities. Execute lexical and cosine searches independently with strict tenant, locale fallback, visibility, service/industry and effective-date filters. Retrieve top 20 each, merge via Reciprocal Rank Fusion (`k=60`), deduplicate same document/near chunks, optionally rerank top 20, return max 8 chunks from max 5 documents. Diversity rule prevents one long document monopolizing context.
+Normalize/query-expand from current intent and key entities. Execute lexical and cosine searches independently with strict locale fallback, visibility, service/industry and effective-date filters. Retrieve top 20 each, merge via Reciprocal Rank Fusion (`k=60`), deduplicate same document/near chunks, optionally rerank top 20, return max 8 chunks from max 5 documents. Diversity rule prevents one long document monopolizing context.
 
 Permission filters are part of SQL and rechecked on hydrated documents. No post-hoc filtering of already exposed private content. Query timeout 800 ms target; degrade to lexical if embedding unavailable and mark trace.
 
@@ -33,4 +33,4 @@ Expired/archived versions are excluded. Documents with review cadence generate w
 
 ## Extraction threshold
 
-Consider Qdrant or separate retrieval service only when active chunks exceed ~5 million, measured p95 retrieval breaches SLO after PostgreSQL tuning, retrieval load harms OLTP, or multi-vector/tenant isolation capabilities are demonstrably required. Benchmark and ADR first.
+Consider Qdrant or separate retrieval service only when active chunks exceed ~5 million, measured p95 retrieval breaches SLO after PostgreSQL tuning, retrieval load harms OLTP, or multi-vector capabilities are demonstrably required. Benchmark and ADR first.

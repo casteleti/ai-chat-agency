@@ -22,7 +22,7 @@ No real model/RAG/tool. User message persists before run. Deltas are ephemeral/p
 
 ## Tests/Commands
 
-State transitions/property tests, duplicate message/run, concurrent send, disconnect/replay cursor, cancellation/failure/retry, owner/tenant access, slow client/backpressure, mobile offline draft E2E. `pnpm test:integration test:e2e test:a11y verify`.
+State transitions/property tests, duplicate message/run, concurrent send, disconnect/replay cursor, cancellation/failure/retry, owner access, slow client/backpressure, mobile offline draft E2E. `pnpm test:integration test:e2e test:a11y verify`.
 
 ## Acceptance Criteria
 

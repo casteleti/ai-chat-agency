@@ -10,7 +10,7 @@ All prior evidence; threat/AI/upload/rate/LGPD; testing/load; UX/a11y/performanc
 
 ## Scope
 
-Full threat-model tests and remediation; dependency/container/secret/SAST/IaC scans; CSP/headers/CSRF/SSRF/tenant/auth/tool/webhook/rate/cost breakers; cross-browser/mobile/manual WCAG; k6/SSE/DB/RAG/queue load/soak/spike; chaos/fallback/reconciliation; backup+isolated restore drill; runbook exercises; privacy export/delete; final performance optimization.
+Full threat-model tests and remediation; dependency/container/secret/SAST/IaC scans; CSP/headers/CSRF/SSRF/auth/tool/webhook/rate/cost breakers; cross-browser/mobile/manual WCAG; k6/SSE/DB/RAG/queue load/soak/spike; chaos/fallback/reconciliation; backup+isolated restore drill; runbook exercises; privacy export/delete; final performance optimization.
 
 ## Files
 
@@ -26,7 +26,7 @@ No severity waiver hidden as success. Critical/high exploitable findings block. 
 
 ## Acceptance Criteria
 
-Hard AI/security assertions 100%; cross-tenant/unauthorized tool 0; axe critical/serious 0 and manual pass; SLO/load budgets; no duplicate writes under faults; RPO/RTO drill; all runbooks executable; release risks accepted with owner/expiry only if non-blocking.
+Hard AI/security assertions 100%; unauthorized tool 0; axe critical/serious 0 and manual pass; SLO/load budgets; no duplicate writes under faults; RPO/RTO drill; all runbooks executable; release risks accepted with owner/expiry only if non-blocking.
 
 ## Completion Report
 

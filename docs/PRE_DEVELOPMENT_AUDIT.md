@@ -12,14 +12,14 @@ Result: **PASS — READY FOR G0**
 - [x] Bounded contexts and forbidden dependency directions are defined.
 - [x] Public anonymous and private authenticated boundaries are explicit; anonymous email never authenticates.
 - [x] REST/SSE, OpenAPI, errors, idempotency, events/jobs and provider ports are specified.
-- [x] Core entities, tenant constraints, ERD, migrations, seeds, retention and embedding dimension/model are defined.
+- [x] Core entities, ERD, migrations, seeds, retention and embedding dimension/model are defined.
 - [x] One orchestrator/logical roles versus deterministic workflow is unambiguous.
 - [x] Prompt composition, prompt/agent versioning, model routing and context/memory budgets are specified.
 - [x] Every cataloged tool has caller, authorization, confirmation, schema, idempotency, errors and audit.
 - [x] Generative UI is a versioned allowlist; no arbitrary frontend code/action.
 - [x] New-business, qualification, opportunity, support, human handoff and admin flows have failure/exit states.
 - [x] RAG includes publication, chunking, hybrid retrieval, permissions, rerank, citations, staleness and quality thresholds.
-- [x] Threats cover prompt/tool/tenant/auth/upload/XSS/CSRF/SSRF/SQL/secrets/session/rate/DoS; trust zones separate instructions/data.
+- [x] Threats cover prompt/tool/auth/upload/XSS/CSRF/SSRF/SQL/secrets/session/rate/DoS; trust zones separate instructions/data.
 - [x] LGPD purposes/consent/minimization/rights/processors/retention/deletion/export are implementation-bound.
 - [x] Testing includes deterministic, integration, contracts, E2E, evals, injection, a11y, load, fault and cross-browser with thresholds.
 - [x] Deployment, typed config, flags, health/readiness, backups/RPO/RTO, CI/CD, dashboards and runbooks are defined.

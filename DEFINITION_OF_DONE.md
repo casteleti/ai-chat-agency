@@ -19,7 +19,7 @@ A feature or gate is complete only when all applicable items are evidenced.
 
 ## Security and privacy
 
-- Authentication, tenant/resource authorization, rate limits, input limits, and trust zones are tested.
+- Authentication, resource authorization, rate limits, input limits, and trust zones are tested.
 - Sensitive fields are classified; logs/traces are redacted; retention/deletion behavior is implemented.
 - Threat model is updated for new attack surface.
 - Dependency/container/secret scans meet policy; critical/high findings are resolved or release-blocked.

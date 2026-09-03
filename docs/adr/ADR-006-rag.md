@@ -4,7 +4,7 @@ Status: Accepted — 2026-09-02
 
 ## Context
 
-Agency knowledge is curated, permissioned and expected to remain far below millions of active chunks initially. Retrieval must combine terminology and semantics with tenant/visibility/date filters.
+Agency knowledge is curated, permissioned and expected to remain far below millions of active chunks initially. Retrieval must combine terminology and semantics with visibility/date filters.
 
 ## Decision
 

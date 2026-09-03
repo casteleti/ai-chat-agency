@@ -22,7 +22,7 @@ No hidden reasoning/irrelevant PII. Persist before notification/success. Human r
 
 ## Tests/Commands
 
-Package completeness/factuality, routing/urgency, duplicate/retry, notification fail, no assignee, takeover concurrency, human/AI speaker lock, consent, cross-tenant, first-response repetition rubric. `test:evals test:integration test:e2e verify`.
+Package completeness/factuality, routing/urgency, duplicate/retry, notification fail, no assignee, takeover concurrency, human/AI speaker lock, consent, first-response repetition rubric. `test:evals test:integration test:e2e verify`.
 
 ## Acceptance Criteria
 

@@ -2,7 +2,7 @@
 
 Purpose: formulate retrieval queries, select authorized evidence and draft grounded responses with citations. It is not an authority source by itself.
 
-Inputs: user intent/question, tenant/visibility/language/effective date, query expansion terms, retrieval candidates with scores/source IDs. Outputs: selected chunk IDs, answer claims mapped to citations, knowledge gap/low-confidence signal.
+Inputs: user intent/question, visibility/language/effective date, query expansion terms, retrieval candidates with scores/source IDs. Outputs: selected chunk IDs, answer claims mapped to citations, knowledge gap/low-confidence signal.
 
 Tools: `searchKnowledge`, `searchCaseStudies`, `getService`. Read only.
 

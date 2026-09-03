@@ -10,7 +10,7 @@ G8/G3 evidence, provider interfaces, API/tool catalog, user journeys, resilience
 
 ## Scope
 
-Meeting types/intents/slots/bookings; `CalendarProvider`, fake and selected production adapter; signed expiring slot token bound to tenant/type/timezone; contact verification; booking idempotency/reconciliation/webhooks; meeting picker/confirmation UI; capture preference fallback; meeting intelligence pack link; notifications/events.
+Meeting types/intents/slots/bookings; `CalendarProvider`, fake and selected production adapter; signed expiring slot token bound to type/timezone; contact verification; booking idempotency/reconciliation/webhooks; meeting picker/confirmation UI; capture preference fallback; meeting intelligence pack link; notifications/events.
 
 ## Files
 
@@ -22,7 +22,7 @@ UTC persistence + IANA attendee timezone; never model-generated slots; explicit 
 
 ## Tests/Commands
 
-DST gaps/overlaps, locale formatting, expired/tampered/cross-tenant slot, two-user race, duplicate request, provider success timeout, unavailable fallback, consent/identity, webhook replay, responsive/a11y picker. `test:integration test:e2e test:a11y verify`.
+DST gaps/overlaps, locale formatting, expired/tampered/forged slot, two-user race, duplicate request, provider success timeout, unavailable fallback, consent/identity, webhook replay, responsive/a11y picker. `test:integration test:e2e test:a11y verify`.
 
 ## Acceptance Criteria
 

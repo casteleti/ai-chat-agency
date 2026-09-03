@@ -2,7 +2,7 @@
 
 ## Envelope
 
-Every internal event has `id` (UUIDv7), `type`, `schemaVersion`, `tenantId`, `aggregateType`, `aggregateId`, `occurredAt`, `actor`, `requestId`, `correlationId`, `causationId`, `payload`, and `sensitivity`. Events are inserted into `outbox_events` in the same transaction as the business change. Worker claims, delivers, and records attempts; consumers store `(consumer,event_id)` uniqueness.
+Every internal event has `id` (UUIDv7), `type`, `schemaVersion`, `aggregateType`, `aggregateId`, `occurredAt`, `actor`, `requestId`, `correlationId`, `causationId`, `payload`, and `sensitivity`. Events are inserted into `outbox_events` in the same transaction as the business change. Worker claims, delivers, and records attempts; consumers store `(consumer,event_id)` uniqueness.
 
 ## Canonical events
 
@@ -28,12 +28,12 @@ Every internal event has `id` (UUIDv7), `type`, `schemaVersion`, `tenantId`, `ag
 
 ## Job contract
 
-Jobs carry `jobVersion`, tenant, request/correlation, idempotency key, payload reference (not secrets), attempt policy, and expiry. Defaults: exponential backoff with jitter, max 5 attempts for transient providers, dead-letter after exhaustion, no retry for validation/auth/policy denial. Handlers re-read authoritative records and are safe after crash between external success and local acknowledgment through provider idempotency or reconciliation lookup.
+Jobs carry `jobVersion`, request/correlation, idempotency key, payload reference (not secrets), attempt policy, and expiry. Defaults: exponential backoff with jitter, max 5 attempts for transient providers, dead-letter after exhaustion, no retry for validation/auth/policy denial. Handlers re-read authoritative records and are safe after crash between external success and local acknowledgment through provider idempotency or reconciliation lookup.
 
 ## Critical idempotency keys
 
-- Message: tenant + conversation + client message ID.
-- Lead/contact/company: tenant + normalized email/domain + operation purpose.
+- Message: conversation + client message ID.
+- Lead/contact/company: normalized email/domain + operation purpose.
 - CRM deal: internal opportunity ID + provider.
 - Meeting: scheduling intent ID + selected slot + provider.
 - Ticket: support request ID + provider.
@@ -44,4 +44,4 @@ Idempotency records store request hash, status, result reference, expiry, and co
 
 ## Fallback matrix
 
-Provider failure must never be hidden through a fabricated success. Retry only operations documented as safe. Circuit breakers are per tenant/provider/operation and open on sustained failure. Optional providers do not fail `/ready`; PostgreSQL and critical config do. Detailed operator actions are in runbooks.
+Provider failure must never be hidden through a fabricated success. Retry only operations documented as safe. Circuit breakers are per provider/operation and open on sustained failure. Optional providers do not fail `/ready`; PostgreSQL and critical config do. Detailed operator actions are in runbooks.

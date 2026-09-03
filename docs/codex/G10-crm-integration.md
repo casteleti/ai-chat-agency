@@ -22,7 +22,7 @@ Internal commit first; model never calls CRM. Provider credentials encrypted/sco
 
 ## Tests/Commands
 
-Normalize/dedupe, consent/authorization, duplicate idempotency, internal success/provider fail/retry, provider success/local timeout/reconcile, webhook signature/replay/out-of-order, tenant mapping, flag off, token redaction; production sandbox/read/write smoke only with authorization. Run integration/security/E2E/verify.
+Normalize/dedupe, consent/authorization, duplicate idempotency, internal success/provider fail/retry, provider success/local timeout/reconcile, webhook signature/replay/out-of-order, external ID mapping, flag off, token redaction; production sandbox/read/write smoke only with authorization. Run integration/security/E2E/verify.
 
 ## Acceptance Criteria
 

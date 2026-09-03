@@ -57,4 +57,4 @@ G0 creates executable scaffolding; later gates populate it. Planning files alrea
 └── SECURITY.md
 ```
 
-Hierarchical instructions created in G0: `/apps/web/AGENTS.md` for accessibility/performance/client boundaries; `/packages/ai/AGENTS.md` for trust/evals/prompts/tools; `/packages/database/AGENTS.md` for tenant/migration/SQL rules.
+Hierarchical instructions created in G0: `/apps/web/AGENTS.md` for accessibility/performance/client boundaries; `/packages/ai/AGENTS.md` for trust/evals/prompts/tools; `/packages/database/AGENTS.md` for migration/SQL rules.

@@ -25,7 +25,7 @@ AI extracts evidence; software computes. Each dimension receives 0–5, evidence
 
 `weightedScore = Σ(score/5 × weight)` over known dimensions. `coverage = knownWeight/100`. `confidence = weighted evidence confidence / knownWeight`. Displayed score requires coverage ≥60%; otherwise show “insufficient context.” Thresholds: 75–100 `PRIORITY`; 55–74 `QUALIFIED`; 35–54 `NURTURE`; <35 `LOW_FIT`. A hard disqualifier (illegal/unethical request, unavailable geography/capability, incompatible minimum) overrides. A human request is always honored but does not change the score.
 
-Recommendations combine band, confidence, urgency and user preference: priority → meeting/handoff; qualified → meeting; nurture → useful resource/follow-up; low fit → honest alternative. Scores/weights are tenant-configured and versioned; every result stores algorithm version.
+Recommendations combine band, confidence, urgency and user preference: priority → meeting/handoff; qualified → meeting; nurture → useful resource/follow-up; low fit → honest alternative. Scores/weights are configured and versioned; every result stores algorithm version.
 
 ## Opportunity map
 

@@ -18,9 +18,12 @@ const failures = [];
 const files = [];
 const directories = new Set();
 
+const excludedDirs = new Set(['.git', 'node_modules']);
+
 async function walk(dir) {
   directories.add(dir);
   for (const entry of await readdir(dir, { withFileTypes: true })) {
+    if (entry.isDirectory() && excludedDirs.has(entry.name)) continue;
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) await walk(full);
     else if (entry.isFile()) files.push(full);

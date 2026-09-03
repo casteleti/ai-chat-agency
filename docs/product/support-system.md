@@ -17,7 +17,7 @@ MVP supports public answers, safe issue collection, deterministic triage, intern
 | SEV-3 Normal | limited defect/request with workaround, ordinary project/account question | 1 business day |
 | SEV-4 Low | cosmetic, idea, informational, no operational impact | 2 business days |
 
-AI extracts impact, scope, onset, workaround, deadline and financial/security signals. Code applies rules; any hard signal takes the maximum severity. AI cannot downgrade. Staff override requires reason and audit. SLA calendars/timezones are tenant-configured; do not promise 24/7 unless configured.
+AI extracts impact, scope, onset, workaround, deadline and financial/security signals. Code applies rules; any hard signal takes the maximum severity. AI cannot downgrade. Staff override requires reason and audit. SLA calendars/timezones are configured; do not promise 24/7 unless configured.
 
 ## Resolution boundary
 

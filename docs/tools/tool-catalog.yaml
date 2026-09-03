@@ -1,7 +1,7 @@
 catalogVersion: 1
 policyPipeline:
   - schema_validation
-  - identity_and_tenant_resolution
+  - identity_resolution
   - resource_authorization
   - feature_flag
   - risk_and_confirmation
@@ -17,7 +17,7 @@ tools:
   - name: searchKnowledge
     description: Search published, effective, authorized knowledge with hybrid retrieval.
     caller: [CONCIERGE, NEW_BUSINESS, SUPPORT, KNOWLEDGE]
-    authorization: PUBLIC_READ or AUTHORIZED_PRIVATE_READ with tenant/visibility filters
+    authorization: PUBLIC_READ or AUTHORIZED_PRIVATE_READ with visibility filters
     confirmation: never
     input: "{query:string 2..500, locale, types?:enum[], serviceIds?:uuid[], industry?:string, topK?:1..20}"
     output: "{results:[{chunkId,documentVersionId,title,excerpt,score,citation,visibility}], degraded:boolean}"
@@ -51,7 +51,7 @@ tools:
     confirmation: explicit user action required
     input: "{url:https-url,focus:[MESSAGING|CONVERSION|AI_READINESS|STRUCTURE],locale}"
     output: "{analysisId,status,observations:[{evidence,hypothesis,confidence}],limitations,preliminary:true}"
-    idempotency: "tenant + normalized URL + focus + analyzer version; cache 24h"
+    idempotency: "normalized URL + focus + analyzer version; cache 24h"
     errors: [URL_NOT_ALLOWED, TOOL_TIMEOUT, CONTENT_UNSUPPORTED, RATE_LIMITED]
     audit: URL, policy result, fetch metadata; no fetched secrets
   - name: analyzeFile
@@ -111,7 +111,7 @@ tools:
     confirmation: explicit when using contact data for follow-up
     input: "{conversationId,contact:{name?,email,phone?},company?,consentPurpose,briefingId?}"
     output: "{leadId,contactId,companyId?,created:boolean,crmSyncStatus}"
-    idempotency: "tenant + normalized verified email + conversation purpose"
+    idempotency: "normalized verified email + conversation purpose"
     errors: [CONSENT_REQUIRED, IDENTITY_NOT_VERIFIED, CONFLICT, RATE_LIMITED]
     audit: consent, actor, canonical IDs, before/after
   - name: updateLead
@@ -131,7 +131,7 @@ tools:
     confirmation: explicit user consent to agency follow-up; no implied contract
     input: "{leadId,briefingId,qualificationId,initiativeIds,source}"
     output: "{opportunityId,status,crmSyncStatus}"
-    idempotency: "lead + active opportunity purpose + tenant"
+    idempotency: "lead + active opportunity purpose"
     errors: [PRECONDITION_FAILED, CONSENT_REQUIRED, CONFLICT]
     audit: full business write
   - name: updateOpportunity

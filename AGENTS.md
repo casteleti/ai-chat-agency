@@ -11,7 +11,6 @@ Before any change, read `PROJECT.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `CODEX.
 - Maintain a modular monolith. Do not introduce services, brokers, vector databases, orchestration platforms, or new providers without an accepted ADR.
 - Domain packages expose application services and ports. Never import another domain's repository or reach into its tables.
 - `apps/web` and `apps/admin` access data only through the API/contracts. Only API/worker server code accesses repositories.
-- All tenant-owned repositories accept `TenantContext` as a required first argument; no optional/global tenant.
 - Cross-context side effects use the transactional outbox. Durable jobs use pg-boss; Redis must never be the sole record of work.
 - Vendor SDK types do not cross adapter boundaries.
 - AI output is untrusted until validated. Tools execute through the policy pipeline. Generative UI uses the registered discriminated union only.
@@ -30,8 +29,8 @@ Before any change, read `PROJECT.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `CODEX.
 
 - Drizzle schema plus checked-in forward-only SQL migration. Never edit a migration already applied outside local development.
 - Destructive migrations use expand/migrate/contract across releases, backup evidence, and a rollback/runbook step.
-- Add tenant, foreign-key, unique, check, and performance indexes explicitly. JSONB payloads require a schema version.
-- Tests must prove tenant isolation, constraints, idempotency, and migration from a clean and previous schema.
+- Add foreign-key, unique, check, and performance indexes explicitly. JSONB payloads require a schema version.
+- Tests must prove constraints, idempotency, and migration from a clean and previous schema.
 - Seeds are deterministic, non-sensitive, and safe to rerun in development.
 
 ## Security

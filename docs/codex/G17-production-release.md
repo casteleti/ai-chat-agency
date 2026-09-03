@@ -10,7 +10,7 @@ G16 complete evidence, deployment/topology/CI/CD, all runbooks, DoD, risk/tracea
 
 ## Scope
 
-Provision/harden Cloudflare/Hetzner/Caddy/networks/volumes/backups; deploy signed exact images; production secrets/roles; migrate/bootstrap agency tenant; load reviewed public knowledge; configure one CRM/calendar/email/observability; keep flags safe-off; live read/write validation with test records and cleanup policy; smoke; staged flag enable; dashboards/alerts/on-call; privacy/legal artifacts; release tag/changelog/status.
+Provision/harden Cloudflare/Hetzner/Caddy/networks/volumes/backups; deploy signed exact images; production secrets/roles; migrate/bootstrap agency database; load reviewed public knowledge; configure one CRM/calendar/email/observability; keep flags safe-off; live read/write validation with test records and cleanup policy; smoke; staged flag enable; dashboards/alerts/on-call; privacy/legal artifacts; release tag/changelog/status.
 
 ## Files
 

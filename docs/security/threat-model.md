@@ -8,7 +8,7 @@ Assets: identities/sessions, lead/client/project data, conversations/files, prom
 |---|---|---|
 | direct/indirect prompt injection | trust-labeled context, policy outside model, no instruction from RAG/tool data | injection eval corpus, forbidden tool assertions |
 | tool abuse/argument injection | allowlist, Zod, identity/resource policy, confirmation, idempotency | 100% authorization matrix/property tests |
-| cross-tenant leak | required TenantContext, composite FK/index, selective RLS, cache key tenant | tenant-B integration/E2E canaries; 0 leaks |
+| unauthorized cross-resource access | resource-scoped repository queries, ownership checks, RLS on sensitive tables | resource-authorization/IDOR integration/E2E tests; 0 leaks |
 | client impersonation/enumeration | uniform magic-link response, verified membership, short tokens, limits | auth enumeration/session fixation tests |
 | XSS/HTML injection | React escaping, safe markdown subset, CSP, no arbitrary UI | stored/reflected DOM security tests |
 | CSRF | SameSite cookies, Origin/Referer, CSRF token for mutations | cross-site request tests |
