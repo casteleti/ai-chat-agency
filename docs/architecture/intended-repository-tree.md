@@ -16,11 +16,9 @@ G0 creates executable scaffolding; later gates populate it. Planning files alrea
 │   ├── database/            # Drizzle schema, migrations, repositories, tests
 │   ├── domain-identity/
 │   ├── domain-conversation/
-│   ├── domain-commercial/
+│   ├── domain-commercial/   # includes meeting scheduling (intent, slots, booking)
 │   ├── domain-knowledge/
-│   ├── domain-meetings/
-│   ├── domain-support/
-│   ├── domain-handoff/
+│   ├── domain-support/      # includes escalation/handoff
 │   ├── integrations/        # CRM/calendar/support/email/channel adapters
 │   ├── observability/
 │   ├── security/

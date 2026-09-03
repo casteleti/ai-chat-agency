@@ -15,12 +15,12 @@ Every internal event has `id` (UUIDv7), `type`, `schemaVersion`, `tenantId`, `ag
 | `diagnostic.generated.v1` | Commercial | UI, analytics | conversation retention |
 | `lead.identified.v1` | Commercial | CRM sync | business/legal retention |
 | `lead.qualified.v1` | Qualification | CRM, analytics | 24 months |
-| `meeting.requested.v1` | Meetings | calendar sync | 24 months |
-| `meeting.scheduled.v1` | Meetings | CRM, notifications | business/legal retention |
+| `meeting.requested.v1` | Commercial | calendar sync | 24 months |
+| `meeting.scheduled.v1` | Commercial | CRM, notifications | business/legal retention |
 | `support.request_created.v1` | Support | routing, notifications | support retention |
 | `ticket.created.v1` | Support | analytics, notifications | SLA/legal retention |
-| `handoff.requested.v1` | Escalation | routing, notifications | 24 months |
-| `handoff.completed.v1` | Escalation | analytics | 24 months |
+| `handoff.requested.v1` | Support | routing, notifications | 24 months |
+| `handoff.completed.v1` | Support | analytics | 24 months |
 | `knowledge.published.v1` | Knowledge | ingestion/index | document lifetime |
 | `knowledge.indexed.v1` | Worker | admin/quality | document lifetime |
 | `integration.sync_failed.v1` | Adapter job | alerting, retry | 90 days + audit pointer |

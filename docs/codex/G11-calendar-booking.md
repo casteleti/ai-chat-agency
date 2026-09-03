@@ -14,7 +14,7 @@ Meeting types/intents/slots/bookings; `CalendarProvider`, fake and selected prod
 
 ## Files
 
-Meeting domain/repositories/API/tools; calendar adapters/jobs/webhooks; UI components; tests/migrations.
+Meeting scheduling within `domain-commercial` (repositories/API/tools); calendar adapters/jobs/webhooks; UI components; tests/migrations.
 
 ## Constraints
 

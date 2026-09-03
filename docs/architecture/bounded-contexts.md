@@ -7,9 +7,8 @@
 | AI orchestration | runs, context, routing, prompt/agent versions | `executeTurn`, structured proposals | direct DB tables outside repositories |
 | Policy/tools | capability registry, confirmations, tool calls | authorized executor | UI internals, vendor SDK leakage |
 | Knowledge | documents, versions, chunks, retrieval | publish/ingest/search/cite | conversation writes |
-| Commercial | company/contact/lead/opportunity/brief/qualification | commercial commands/read models | external CRM models |
-| Meetings | scheduling intent, slots, booking | calendar port/service | provider-specific fields |
-| Support | request, classification, severity, ticket, SLA | triage/ticket commands | private data without Identity policy |
+| Commercial | company/contact/lead/opportunity/brief/qualification/meeting scheduling (intent, slots, booking) | commercial commands/read models, calendar port/service | external CRM models, provider-specific meeting fields |
+| Support | request, classification, severity, ticket, SLA, escalation/handoff | triage/ticket commands, handoff package/routing | private data without Identity policy |
 | Integrations | adapters, mappings, webhooks, sync state | provider ports/adapters | product decisions |
 | Experience | UI descriptors, website context | renderer contract | arbitrary model content |
 | Analytics/quality | events, aggregates, feedback, eval results | event/eval queries | primary domain mutation |

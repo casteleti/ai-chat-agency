@@ -14,7 +14,7 @@ Handoff package generation/validation/version/persistence; facts vs hypotheses/s
 
 ## Files
 
-Handoff domain/repository/API/tool; notification port/adapters/jobs/templates; staff/public UI states; prompt/version; tests/evals.
+Handoff/escalation within `domain-support` (repository/API/tool); notification port/adapters/jobs/templates; staff/public UI states; prompt/version; tests/evals.
 
 ## Constraints
 
