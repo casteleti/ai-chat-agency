@@ -1,9 +1,10 @@
 # Authorization Matrix
 
-Legend: `C` create, `R` read, `U` update, `X` execute/action, `A` administer, `own` means only the actor-owned resource, `pub` public projection, `asg` assigned resources.
+Legend: `C` create, `R` read, `U` update, `X` execute/action, `A` administer, `D` delete/anonymize (LGPD subject-rights erasure, distinct from ordinary `U`; execution is always privacy-process-gated and audited, never a routine CRUD path), `own` means only the actor-owned resource, `pub` public projection, `asg` assigned resources.
 
 | Resource/action | Anonymous | Verified lead | Client user (V1) | Sales | Support | Knowledge editor | Admin/Owner |
 |---|---|---|---|---|---|---|---|
+| data subject deletion/anonymization (LGPD rights request, any resource holding their personal data) | — | X own (request only) | X own (request only) | — | X initiate on behalf, authorized channel only | — | D execute (privacy process, audited; see `docs/database/data-retention.md` deletion workflow) |
 | public conversation | CRU own | CRU own/linked | CRU own | R/U assigned | R/U support assigned | no default | A tenant |
 | private conversation | — | — | R own/account allowed | R assigned commercial | R assigned support | — | R/A audited |
 | briefing/opportunity map | CRU own | CRU own | R own if shared | CRU assigned | R when handoff | — | A |
