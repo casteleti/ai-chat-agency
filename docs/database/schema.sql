@@ -91,6 +91,20 @@ CREATE TABLE conversation_participants (
   PRIMARY KEY (tenant_id,conversation_id,participant_type,participant_id),
   FOREIGN KEY (tenant_id,conversation_id) REFERENCES conversations(tenant_id,id)
 );
+CREATE TABLE identity_challenges (
+  id uuid PRIMARY KEY, tenant_id uuid NOT NULL REFERENCES tenants(id), conversation_id uuid NOT NULL,
+  purpose text NOT NULL CHECK (purpose IN ('SAVE','BOOKING')), email text NOT NULL,
+  token_hash text NOT NULL UNIQUE, expires_at timestamptz NOT NULL, consumed_at timestamptz,
+  attempt_count int NOT NULL DEFAULT 0, contact_id uuid, consent_id uuid REFERENCES consents(id),
+  ip_hash text, created_at timestamptz NOT NULL,
+  FOREIGN KEY (tenant_id,conversation_id) REFERENCES conversations(tenant_id,id),
+  FOREIGN KEY (tenant_id,contact_id) REFERENCES contacts(tenant_id,id)
+);
+CREATE INDEX identity_challenges_pending ON identity_challenges(tenant_id,conversation_id,purpose) WHERE consumed_at IS NULL;
+-- Backs POST /conversations/{id}/identity/challenge and /identity/verify (docs/codex/G3-identity-consent-policy.md).
+-- token_hash mirrors the visitor_sessions.token_hash pattern: raw one-time token is never persisted.
+-- consumed_at is the replay guard (a used or absent-consumed_at-but-expired row must fail verify uniformly,
+-- per G3's "expired/replayed OTP" test and anti-enumeration constraint).
 CREATE TABLE messages (
   id uuid PRIMARY KEY, tenant_id uuid NOT NULL REFERENCES tenants(id), conversation_id uuid NOT NULL,
   role text NOT NULL CHECK (role IN ('USER','ASSISTANT','HUMAN','SYSTEM_EVENT')),
