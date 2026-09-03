@@ -55,6 +55,7 @@ Every ADR contains status, context, decision, alternatives, consequences and ris
 | `docs/adr/ADR-013-crm-abstraction.md` | canonical CRM/provider adapter | G10 |
 | `docs/adr/ADR-014-support-boundary.md` | public MVP/private V1 | G12 |
 | `docs/adr/ADR-015-multitenancy.md` | tenant-ready shared schema | G2/G3 |
+| `docs/adr/ADR-016-postgres-contention-mitigation.md` | pooling/autovacuum/extraction triggers for OLTP+vector+FTS+jobs on one instance | G2/G6/G10/G16 |
 
 ## Product files
 

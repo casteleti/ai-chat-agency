@@ -5,7 +5,7 @@ The future application tree is in `architecture/intended-repository-tree.md`; th
 ```text
 ai-business-concierge-blueprint/
 ├── docs/
-│   ├── adr/                    # ADR-001 through ADR-015
+│   ├── adr/                    # ADR-001 through ADR-016
 │   ├── agents/                 # concierge, new business, qualification, support, knowledge, handoff
 │   ├── analytics/
 │   │   └── analytics-observability.md
