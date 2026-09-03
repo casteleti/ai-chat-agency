@@ -93,18 +93,30 @@ CREATE TABLE conversation_participants (
 );
 CREATE TABLE identity_challenges (
   id uuid PRIMARY KEY, tenant_id uuid NOT NULL REFERENCES tenants(id), conversation_id uuid NOT NULL,
-  purpose text NOT NULL CHECK (purpose IN ('SAVE','BOOKING')), email text NOT NULL,
-  token_hash text NOT NULL UNIQUE, expires_at timestamptz NOT NULL, consumed_at timestamptz,
-  attempt_count int NOT NULL DEFAULT 0, contact_id uuid, consent_id uuid REFERENCES consents(id),
+  purpose text NOT NULL CHECK (purpose IN ('SAVE','BOOKING')),
+  email text, phone_e164 text, CHECK ((email IS NOT NULL) <> (phone_e164 IS NOT NULL)),
+  token_hash text NOT NULL UNIQUE,
+  expires_at timestamptz NOT NULL CHECK (expires_at <= created_at + interval '10 minutes'),
+  consumed_at timestamptz, invalidated_at timestamptz,
+  attempt_count int NOT NULL DEFAULT 0 CHECK (attempt_count >= 0),
+  contact_id uuid, consent_id uuid REFERENCES consents(id),
   ip_hash text, created_at timestamptz NOT NULL,
   FOREIGN KEY (tenant_id,conversation_id) REFERENCES conversations(tenant_id,id),
   FOREIGN KEY (tenant_id,contact_id) REFERENCES contacts(tenant_id,id)
 );
-CREATE INDEX identity_challenges_pending ON identity_challenges(tenant_id,conversation_id,purpose) WHERE consumed_at IS NULL;
+CREATE INDEX identity_challenges_pending ON identity_challenges(tenant_id,conversation_id,purpose)
+  WHERE consumed_at IS NULL AND invalidated_at IS NULL;
 -- Backs POST /conversations/{id}/identity/challenge and /identity/verify (docs/codex/G3-identity-consent-policy.md).
 -- token_hash mirrors the visitor_sessions.token_hash pattern: raw one-time token is never persisted.
--- consumed_at is the replay guard (a used or absent-consumed_at-but-expired row must fail verify uniformly,
+-- 10-minute TTL (short-lived OTP/magic-link convention): enforced by a CHECK, not just app logic,
+-- so a future bug cannot mint a longer-lived token even if it forgets to compute expires_at correctly.
+-- email/phone_e164 hold the challenge DESTINATION only; no `contacts` row is read or written here.
+-- contact_id stays NULL until a successful verify: verify find-or-creates the contact by normalized
+-- email/phone at that point (never at challenge time), then sets contact_id and contacts.verified_at.
+-- consumed_at is the replay guard (a used, expired, or invalidated row must fail verify uniformly,
 -- per G3's "expired/replayed OTP" test and anti-enumeration constraint).
+-- attempt_count increments on every failed verify; the 6th attempt sets invalidated_at instead of
+-- incrementing further (max 5 attempts/challenge), and a new challenge is required after that point.
 CREATE TABLE messages (
   id uuid PRIMARY KEY, tenant_id uuid NOT NULL REFERENCES tenants(id), conversation_id uuid NOT NULL,
   role text NOT NULL CHECK (role IN ('USER','ASSISTANT','HUMAN','SYSTEM_EVENT')),

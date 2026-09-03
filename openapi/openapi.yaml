@@ -79,24 +79,27 @@ paths:
   /conversations/{conversationId}/identity/challenge:
     post:
       operationId: createIdentityChallenge
-      summary: Send a uniform magic-link/OTP challenge; never confirms whether the email is already known
+      summary: Send a uniform magic-link/OTP challenge; never confirms whether the destination is already known
+      description: No `contacts` row is created or matched at this step; the destination is held only in `identity_challenges` until a successful verify.
+      x-rate-limit: {perContact: {limit: 5, windowMinutes: 60}, perIp: {limit: 20, windowMinutes: 60}}
       parameters: [{$ref: '#/components/parameters/ConversationId'}]
       requestBody:
         required: true
         content: {application/json: {schema: {$ref: '#/components/schemas/IdentityChallengeRequest'}}}
       responses:
-        '202': {description: Accepted (uniform response regardless of email match), content: {application/json: {schema: {$ref: '#/components/schemas/IdentityChallengeResult'}}}}
+        '202': {description: Accepted (uniform response regardless of destination match), content: {application/json: {schema: {$ref: '#/components/schemas/IdentityChallengeResult'}}}}
         '429': {$ref: '#/components/responses/RateLimited'}
   /conversations/{conversationId}/identity/verify:
     post:
       operationId: verifyIdentity
-      summary: Redeem a one-time challenge token, link/create the contact, and record consent
+      summary: Redeem a one-time challenge token; find-or-create the contact only on success, then record consent
+      x-rate-limit: {perChallenge: {maxAttempts: 5, onExceed: INVALIDATE_CHALLENGE_REQUIRE_NEW}}
       parameters: [{$ref: '#/components/parameters/ConversationId'}]
       requestBody:
         required: true
         content: {application/json: {schema: {$ref: '#/components/schemas/IdentityVerifyRequest'}}}
       responses:
-        '200': {description: 'Verified; returned contactId is required by POST /meetings', content: {application/json: {schema: {$ref: '#/components/schemas/VerifiedContact'}}}}
+        '200': {description: 'Verified; contact is created/matched by destination only here. Returned contactId is required by POST /meetings.', content: {application/json: {schema: {$ref: '#/components/schemas/VerifiedContact'}}}}
         '422': {$ref: '#/components/responses/IdentityNotVerified'}
         '429': {$ref: '#/components/responses/RateLimited'}
   /meeting-types:
@@ -187,7 +190,7 @@ components:
     Conflict: {description: Conflict, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
     RateLimited: {description: Rate limited, headers: {Retry-After: {schema: {type: integer}}}, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
     Unavailable: {description: Temporarily unavailable, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
-    IdentityNotVerified: {description: 'Verification token invalid, expired, or already used (maps to error code IDENTITY_NOT_VERIFIED)', content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
+    IdentityNotVerified: {description: 'Verification token invalid, expired, already used, or the challenge was invalidated after 5 failed attempts (request a new challenge). Maps to error code IDENTITY_NOT_VERIFIED.', content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
   schemas:
     CreateConversation:
       type: object
@@ -239,10 +242,15 @@ components:
     IdentityChallengeRequest:
       type: object
       additionalProperties: false
-      required: [email, purpose]
+      required: [purpose]
+      description: Exactly one of email or phone must be provided (delivery channel for the magic link/OTP).
       properties:
         email: {type: string, format: email, maxLength: 320}
+        phone: {type: string, pattern: '^\+[1-9]\d{1,14}$', description: E.164 format.}
         purpose: {enum: [SAVE, BOOKING]}
+      oneOf:
+        - required: [email]
+        - required: [phone]
     IdentityChallengeResult:
       type: object
       required: [status]
@@ -253,7 +261,7 @@ components:
       additionalProperties: false
       required: [token, consent, consentVersion]
       properties:
-        token: {type: string, minLength: 16, maxLength: 256, description: One-time token from the challenge email/SMS; single use, expires per G3 policy.}
+        token: {type: string, minLength: 16, maxLength: 256, description: 'One-time token from the challenge email/SMS; single use, expires 10 minutes after issuance (see docs/database/schema.sql#identity_challenges).'}
         consent: {type: boolean}
         consentVersion: {type: string}
     VerifiedContact:

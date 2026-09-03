@@ -12,8 +12,8 @@ Canonical machine contract: `/openapi/openapi.yaml`. All routes are under `/v1` 
 | `GET /v1/conversations/{id}/runs/{runId}/events` | SSE progress/text/UI/tool status; `Last-Event-ID` resume | owner; max 2 connections |
 | `POST /v1/conversations/{id}/confirmations/{id}` | approve/deny pending action | owner; required idempotency |
 | `PATCH /v1/conversations/{id}/briefing` | correct allowed briefing fields | owner; ETag/expected version |
-| `POST /v1/conversations/{id}/identity/challenge` | send uniform magic link/OTP for save/booking | strict IP/email limit |
-| `POST /v1/conversations/{id}/identity/verify` | verify and link contact with consent | one-time token |
+| `POST /v1/conversations/{id}/identity/challenge` | send uniform magic link/OTP (email or phone) for save/booking; no `contacts` row created here | 5/contact/hour, 20/IP/hour |
+| `POST /v1/conversations/{id}/identity/verify` | one-time token; find-or-create contact and link with consent only on success | 5 attempts/challenge, then challenge invalidated (new challenge required) |
 
 ## Knowledge, analysis, meetings and handoff
 
