@@ -31,7 +31,7 @@ If a prospect switches to support, preserve commercial context but activate supp
 
 ## Stop conditions
 
-Stop discovery and offer a useful exit when: user requests it; meeting/human is clearly preferred; question budget is exhausted; enough evidence exists; prospect is poor fit; safety/abuse boundary is reached; or the system cannot add grounded value. Do not prolong conversation solely to maximize captured fields.
+Stop discovery and offer a useful exit when: user requests it; meeting/human is clearly preferred; question budget is exhausted; enough evidence exists; a hard disqualifier is confirmed (illegal/unethical request, unavailable geography/capability, incompatible minimum -- see `docs/product/briefing-qualification-opportunity.md`; this is a single-fact check, evaluable as soon as the fact is stated, not the full weighted Qualification-stage score, which needs ≥60% dimension coverage and is not yet available during Discovery); safety/abuse boundary is reached; or the system cannot add grounded value. Do not prolong conversation solely to maximize captured fields.
 
 ## Website mini-audit
 
