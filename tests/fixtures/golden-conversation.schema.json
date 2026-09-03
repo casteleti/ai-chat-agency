@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version", "locale", "persona", "context", "turns", "expect"],
+  "properties": {
+    "id": {"type": "string"},
+    "version": {"type": "integer", "minimum": 1},
+    "locale": {"enum": ["pt-BR", "en-US"]},
+    "persona": {"type": "string"},
+    "context": {"type": "object"},
+    "turns": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["role", "content"], "properties": {"role": {"enum": ["user", "assistant"]}, "content": {"type": "string"}}}},
+    "expect": {
+      "type": "object",
+      "required": ["primaryIntent", "allowedTools", "forbiddenTools", "assertions"],
+      "properties": {
+        "primaryIntent": {"type": "string"},
+        "allowedTools": {"type": "array", "items": {"type": "string"}},
+        "forbiddenTools": {"type": "array", "items": {"type": "string"}},
+        "briefing": {"type": "object"},
+        "support": {"type": "object"},
+        "assertions": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}

@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concierge.example/schemas/structured-output.v1.json",
+  "title": "AI Business Concierge Structured Outputs",
+  "$defs": {
+    "EvidenceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceType", "sourceId"],
+      "properties": {
+        "sourceType": {"enum": ["MESSAGE", "KNOWLEDGE", "TOOL_RESULT", "USER_CONFIRMATION"]},
+        "sourceId": {"type": "string", "minLength": 1},
+        "excerpt": {"type": "string", "maxLength": 500}
+      }
+    },
+    "IntentClassification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "primary", "secondary", "confidence", "needsClarification"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "primary": {"enum": ["NEW_BUSINESS", "SUPPORT", "GENERAL", "HUMAN", "UNKNOWN"]},
+        "secondary": {"type": "array", "maxItems": 3, "items": {"type": "string"}},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "needsClarification": {"type": "boolean"},
+        "reasonCode": {"type": "string", "maxLength": 80}
+      }
+    },
+    "FieldValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "status", "confidence", "sourceMessageIds"],
+      "properties": {
+        "value": {},
+        "status": {"enum": ["UNKNOWN", "INFERRED", "CONFIRMED", "REJECTED"]},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "sourceMessageIds": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+      }
+    },
+    "Briefing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "briefingId", "version", "fields", "openQuestions"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "briefingId": {"type": "string", "format": "uuid"},
+        "version": {"type": "integer", "minimum": 1},
+        "fields": {
+          "type": "object",
+          "propertyNames": {"pattern": "^[a-z][A-Za-z0-9]{1,80}$"},
+          "additionalProperties": {"$ref": "#/$defs/FieldValue"}
+        },
+        "openQuestions": {"type": "array", "maxItems": 20, "items": {"type": "string", "maxLength": 300}}
+      }
+    },
+    "QualificationDimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "unknown", "confidence", "evidence"],
+      "properties": {
+        "key": {"enum": ["ICP_FIT", "CHALLENGE_SEVERITY", "STRATEGIC_FIT", "TIMING", "BUDGET_READINESS", "AUTHORITY", "ENGAGEMENT", "MATURITY"]},
+        "score": {"type": "integer", "minimum": 0, "maximum": 5},
+        "unknown": {"type": "boolean"},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/EvidenceRef"}}
+      },
+      "allOf": [{"if": {"properties": {"unknown": {"const": false}}}, "then": {"required": ["score"]}}]
+    },
+    "QualificationResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "algorithmVersion", "dimensions", "coverage", "confidence", "band", "recommendation"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "algorithmVersion": {"type": "string"},
+        "dimensions": {"type": "array", "minItems": 8, "maxItems": 8, "items": {"$ref": "#/$defs/QualificationDimension"}},
+        "score": {"type": "number", "minimum": 0, "maximum": 100},
+        "coverage": {"type": "number", "minimum": 0, "maximum": 1},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "band": {"enum": ["INSUFFICIENT_CONTEXT", "LOW_FIT", "NURTURE", "QUALIFIED", "PRIORITY", "DISQUALIFIED"]},
+        "recommendation": {"enum": ["CONTINUE_DISCOVERY", "GUIDANCE", "NURTURE", "OFFER_MEETING", "OFFER_HANDOFF", "DECLINE"]},
+        "hardDisqualifier": {"type": "string", "maxLength": 200}
+      }
+    },
+    "OpportunityItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "problem", "evidence", "businessImpact", "hypothesis", "opportunity", "priority", "confidence", "missingEvidence", "suggestedAction", "relatedServiceIds", "preliminary"],
+      "properties": {
+        "id": {"type": "string"},
+        "problem": {"type": "string", "maxLength": 300},
+        "evidence": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/EvidenceRef"}},
+        "businessImpact": {"type": "string", "maxLength": 500},
+        "hypothesis": {"type": "string", "maxLength": 500},
+        "opportunity": {"type": "string", "maxLength": 500},
+        "priority": {"enum": ["NOW", "NEXT", "LATER"]},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "missingEvidence": {"type": "array", "items": {"type": "string", "maxLength": 250}},
+        "suggestedAction": {"type": "string", "maxLength": 500},
+        "relatedServiceIds": {"type": "array", "uniqueItems": true, "items": {"type": "string", "format": "uuid"}},
+        "funnelStage": {"enum": ["ATTENTION", "DEMAND", "LEAD", "QUALIFICATION", "SALES", "REVENUE", "OPERATIONS"]},
+        "preliminary": {"const": true}
+      }
+    },
+    "OpportunityMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "items", "contradictions", "preliminary"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "items": {"type": "array", "minItems": 1, "maxItems": 5, "items": {"$ref": "#/$defs/OpportunityItem"}},
+        "contradictions": {"type": "array", "maxItems": 5, "items": {"type": "string", "maxLength": 400}},
+        "preliminary": {"const": true}
+      }
+    },
+    "SupportClassification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "category", "severityProposal", "evidence", "needsPrivateData", "escalate"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "category": {"enum": ["PROJECT", "WEBSITE", "MEDIA", "AI", "AUTOMATION", "SEO", "CONTENT", "DESIGN", "HOSTING", "BILLING", "ACCOUNT", "GENERAL", "SECURITY_PRIVACY"]},
+        "severityProposal": {"enum": ["SEV_1", "SEV_2", "SEV_3", "SEV_4"]},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/EvidenceRef"}},
+        "needsPrivateData": {"type": "boolean"},
+        "escalate": {"type": "boolean"},
+        "missingInformation": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "NextBestAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "action", "reason", "confidence", "requiresConfirmation"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "action": {"enum": ["ASK_CLARIFIER", "SHOW_BRIEF", "SHOW_OPPORTUNITY_MAP", "SHOW_CASE", "ANALYZE_WEBSITE", "OFFER_MEETING", "OFFER_HANDOFF", "SAVE_AND_RESUME", "PROVIDE_GUIDANCE", "CLOSE"]},
+        "reason": {"type": "string", "maxLength": 300},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "requiresConfirmation": {"type": "boolean"}
+      }
+    },
+    "HandoffPackage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "reason", "urgency", "requestedTeam", "summary", "facts", "hypotheses", "userGoals", "actionsTaken", "attachments", "unansweredQuestions", "suggestedFirstResponse", "sourceIds"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "reason": {"type": "string", "maxLength": 300},
+        "urgency": {"enum": ["CRITICAL", "HIGH", "NORMAL", "LOW"]},
+        "requestedTeam": {"enum": ["SALES", "STRATEGY", "SUPPORT", "SECURITY", "BILLING", "GENERAL"]},
+        "summary": {"type": "string", "maxLength": 1500},
+        "facts": {"type": "array", "maxItems": 20, "items": {"type": "string", "maxLength": 300}},
+        "hypotheses": {"type": "array", "maxItems": 10, "items": {"type": "string", "maxLength": 300}},
+        "userGoals": {"type": "array", "maxItems": 10, "items": {"type": "string", "maxLength": 300}},
+        "actionsTaken": {"type": "array", "maxItems": 20, "items": {"type": "string", "maxLength": 300}},
+        "attachments": {"type": "array", "items": {"type": "string", "format": "uuid"}},
+        "unansweredQuestions": {"type": "array", "maxItems": 10, "items": {"type": "string", "maxLength": 300}},
+        "suggestedFirstResponse": {"type": "string", "maxLength": 500},
+        "sourceIds": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+      }
+    },
+    "ConversationState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "lifecycle", "journeyStage", "primaryIntent", "locale", "openThreads", "pendingConfirmationIds"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "lifecycle": {"enum": ["ACTIVE", "AWAITING_USER", "AWAITING_CONFIRMATION", "HUMAN_PENDING", "HUMAN_ACTIVE", "COMPLETED", "ABANDONED"]},
+        "journeyStage": {"enum": ["ENTRY", "INTENT", "DISCOVERY", "CONTEXT", "DIAGNOSIS", "BRIEFING", "QUALIFICATION", "RECOMMENDATION", "NEXT_BEST_ACTION", "MEETING", "HANDOFF", "SUPPORT_TRIAGE", "SUPPORT_RESOLUTION"]},
+        "primaryIntent": {"$ref": "#/$defs/IntentClassification"},
+        "locale": {"enum": ["pt-BR", "en-US"]},
+        "openThreads": {"type": "array", "maxItems": 5, "items": {"type": "string", "maxLength": 200}},
+        "pendingConfirmationIds": {"type": "array", "items": {"type": "string", "format": "uuid"}}
+      }
+    }
+  }
+}

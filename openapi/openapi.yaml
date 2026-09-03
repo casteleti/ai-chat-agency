@@ -1,0 +1,186 @@
+openapi: 3.1.0
+info:
+  title: AI Business Concierge API
+  version: 1.0.0-blueprint
+  description: Canonical MVP public API. Admin resources follow the same envelopes and are added in G14.
+servers:
+  - url: https://api.example.com/v1
+security:
+  - sessionCookie: []
+paths:
+  /conversations:
+    post:
+      operationId: createConversation
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateConversation'}
+      responses:
+        '201': {description: Created, content: {application/json: {schema: {$ref: '#/components/schemas/Conversation'}}}}
+        '429': {$ref: '#/components/responses/RateLimited'}
+  /conversations/{conversationId}:
+    get:
+      operationId: getConversation
+      parameters: [{$ref: '#/components/parameters/ConversationId'}]
+      responses:
+        '200': {description: Owner-safe conversation, content: {application/json: {schema: {$ref: '#/components/schemas/Conversation'}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /conversations/{conversationId}/messages:
+    post:
+      operationId: createMessageRun
+      parameters:
+        - {$ref: '#/components/parameters/ConversationId'}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/CreateMessage'}}}
+      responses:
+        '202': {description: Accepted, content: {application/json: {schema: {$ref: '#/components/schemas/RunAccepted'}}}}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '429': {$ref: '#/components/responses/RateLimited'}
+  /conversations/{conversationId}/runs/{runId}/events:
+    get:
+      operationId: streamRunEvents
+      parameters:
+        - {$ref: '#/components/parameters/ConversationId'}
+        - {name: runId, in: path, required: true, schema: {type: string, format: uuid}}
+        - {name: Last-Event-ID, in: header, required: false, schema: {type: string}}
+      responses:
+        '200': {description: SSE stream, content: {text/event-stream: {schema: {type: string}}}}
+  /conversations/{conversationId}/confirmations/{confirmationId}:
+    post:
+      operationId: resolveConfirmation
+      parameters:
+        - {$ref: '#/components/parameters/ConversationId'}
+        - {name: confirmationId, in: path, required: true, schema: {type: string, format: uuid}}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      requestBody:
+        required: true
+        content: {application/json: {schema: {type: object, additionalProperties: false, required: [decision], properties: {decision: {enum: [APPROVE, DENY]}}}}}
+      responses:
+        '200': {description: Resolved, content: {application/json: {schema: {$ref: '#/components/schemas/ActionResult'}}}}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /meeting-types:
+    get:
+      operationId: listMeetingTypes
+      security: []
+      responses:
+        '200': {description: Types, content: {application/json: {schema: {type: array, items: {$ref: '#/components/schemas/MeetingType'}}}}}
+  /meeting-types/{meetingTypeId}/slots:
+    get:
+      operationId: listMeetingSlots
+      security: []
+      parameters:
+        - {name: meetingTypeId, in: path, required: true, schema: {type: string, format: uuid}}
+        - {name: from, in: query, required: true, schema: {type: string, format: date}}
+        - {name: to, in: query, required: true, schema: {type: string, format: date}}
+        - {name: timeZone, in: query, required: true, schema: {type: string}}
+      responses:
+        '200': {description: Slots, content: {application/json: {schema: {type: object, required: [slots, expiresAt], properties: {slots: {type: array, items: {$ref: '#/components/schemas/Slot'}}, expiresAt: {type: string, format: date-time}}}}}}
+        '503': {$ref: '#/components/responses/Unavailable'}
+  /meetings:
+    post:
+      operationId: scheduleMeeting
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/ScheduleMeeting'}}}
+      responses:
+        '201': {description: Scheduled, content: {application/json: {schema: {$ref: '#/components/schemas/Meeting'}}}}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /website-analyses:
+    post:
+      operationId: createWebsiteAnalysis
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/WebsiteAnalysisRequest'}}}
+      responses:
+        '202': {description: Accepted, content: {application/json: {schema: {$ref: '#/components/schemas/AsyncReference'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+  /support-requests:
+    post:
+      operationId: createSupportRequest
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/SupportRequestInput'}}}
+      responses:
+        '201': {description: Created, content: {application/json: {schema: {$ref: '#/components/schemas/SupportRequest'}}}}
+  /handoffs:
+    post:
+      operationId: createHandoff
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {type: object, additionalProperties: false, required: [conversationId, reason, consent], properties: {conversationId: {type: string, format: uuid}, reason: {type: string, maxLength: 500}, consent: {type: boolean}}}}}
+      responses:
+        '201': {description: Created, content: {application/json: {schema: {$ref: '#/components/schemas/Handoff'}}}}
+  /health:
+    get:
+      operationId: health
+      security: []
+      responses: {'200': {description: Alive}}
+  /ready:
+    get:
+      operationId: readiness
+      security: []
+      responses: {'200': {description: Ready}, '503': {description: Not ready}}
+components:
+  securitySchemes:
+    sessionCookie: {type: apiKey, in: cookie, name: concierge_session}
+  parameters:
+    ConversationId: {name: conversationId, in: path, required: true, schema: {type: string, format: uuid}}
+    IdempotencyKey: {name: Idempotency-Key, in: header, required: true, schema: {type: string, minLength: 16, maxLength: 128}}
+  responses:
+    BadRequest: {description: Invalid request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
+    NotFound: {description: Not found, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
+    Conflict: {description: Conflict, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
+    RateLimited: {description: Rate limited, headers: {Retry-After: {schema: {type: integer}}}, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
+    Unavailable: {description: Temporarily unavailable, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
+  schemas:
+    CreateConversation:
+      type: object
+      additionalProperties: false
+      properties:
+        locale: {enum: [pt-BR, en-US]}
+        entryIntent: {enum: [EXPLORE_CHALLENGE, AI_OPPORTUNITY, NEW_PROJECT, EXISTING_CLIENT]}
+        pageContext: {type: object, additionalProperties: false, properties: {path: {type: string, maxLength: 500}, utmSource: {type: string, maxLength: 100}, utmCampaign: {type: string, maxLength: 100}}}
+        consentVersion: {type: string}
+    Conversation:
+      type: object
+      required: [id, status, locale, messages, version]
+      properties: {id: {type: string, format: uuid}, status: {type: string}, locale: {type: string}, messages: {type: array, items: {$ref: '#/components/schemas/Message'}}, version: {type: integer}}
+    Message:
+      type: object
+      required: [id, role, createdAt]
+      properties: {id: {type: string, format: uuid}, role: {enum: [USER, ASSISTANT, HUMAN, SYSTEM_EVENT]}, text: {type: string}, ui: {type: array, items: {type: object}}, createdAt: {type: string, format: date-time}}
+    CreateMessage:
+      type: object
+      additionalProperties: false
+      required: [clientMessageId, text]
+      properties: {clientMessageId: {type: string, format: uuid}, text: {type: string, minLength: 1, maxLength: 10000}, replyToMessageId: {type: string, format: uuid}}
+    RunAccepted:
+      type: object
+      required: [messageId, runId, eventsUrl]
+      properties: {messageId: {type: string, format: uuid}, runId: {type: string, format: uuid}, eventsUrl: {type: string}}
+    ActionResult: {type: object, required: [status], properties: {status: {enum: [APPROVED, DENIED, EXECUTED, FAILED]}, resultReference: {type: string}}}
+    MeetingType: {type: object, required: [id, name, durationMinutes], properties: {id: {type: string, format: uuid}, name: {type: string}, durationMinutes: {type: integer}}}
+    Slot: {type: object, required: [slotToken, start, end, timeZone], properties: {slotToken: {type: string}, start: {type: string, format: date-time}, end: {type: string, format: date-time}, timeZone: {type: string}}}
+    ScheduleMeeting: {type: object, additionalProperties: false, required: [meetingIntentId, slotToken, contactId, timeZone], properties: {meetingIntentId: {type: string, format: uuid}, slotToken: {type: string}, contactId: {type: string, format: uuid}, timeZone: {type: string}}}
+    Meeting: {type: object, required: [id, status, start, end, timeZone, reference], properties: {id: {type: string, format: uuid}, status: {enum: [SCHEDULED, PENDING_SYNC]}, start: {type: string, format: date-time}, end: {type: string, format: date-time}, timeZone: {type: string}, reference: {type: string}}}
+    WebsiteAnalysisRequest: {type: object, additionalProperties: false, required: [conversationId, url, focus, consent], properties: {conversationId: {type: string, format: uuid}, url: {type: string, format: uri, maxLength: 2048}, focus: {type: array, minItems: 1, maxItems: 4, items: {enum: [MESSAGING, CONVERSION, AI_READINESS, STRUCTURE]}}, consent: {type: boolean}}}
+    AsyncReference: {type: object, required: [id, status], properties: {id: {type: string, format: uuid}, status: {enum: [PENDING, RUNNING, COMPLETED, FAILED]}}}
+    SupportRequestInput: {type: object, additionalProperties: false, required: [conversationId, summary, category, consent], properties: {conversationId: {type: string, format: uuid}, summary: {type: string, maxLength: 5000}, category: {type: string}, contactRoute: {type: string, maxLength: 300}, consent: {type: boolean}}}
+    SupportRequest: {type: object, required: [id, status, severity, reference], properties: {id: {type: string, format: uuid}, status: {type: string}, severity: {enum: [SEV_1, SEV_2, SEV_3, SEV_4]}, reference: {type: string}}}
+    Handoff: {type: object, required: [id, status, reference], properties: {id: {type: string, format: uuid}, status: {enum: [PENDING, ROUTED, HUMAN_ACTIVE, COMPLETED]}, reference: {type: string}, expectedResponse: {type: string}}}
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, requestId, retryable]
+          properties: {code: {type: string}, message: {type: string}, requestId: {type: string}, retryable: {type: boolean}, retryAfterSeconds: {type: integer}, details: {type: array, items: {type: object}}}

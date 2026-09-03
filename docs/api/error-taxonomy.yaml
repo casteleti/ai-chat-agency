@@ -1,0 +1,26 @@
+errors:
+  VALIDATION_FAILED: {http: 400, retry: false, log: info, user: "Check the highlighted information."}
+  AUTH_REQUIRED: {http: 401, retry: false, log: info, user: "Please verify your identity to continue."}
+  FORBIDDEN: {http: 403, retry: false, log: warn, user: "You do not have access to that information or action."}
+  RESOURCE_NOT_FOUND: {http: 404, retry: false, log: info, user: "That item could not be found."}
+  CONFLICT: {http: 409, retry: false, log: info, user: "This request conflicts with the current state."}
+  VERSION_CONFLICT: {http: 409, retry: true, log: info, user: "This information changed. Refresh and try again."}
+  INVALID_TRANSITION: {http: 409, retry: false, log: warn, user: "That action is not available in the current state."}
+  IDEMPOTENCY_CONFLICT: {http: 409, retry: false, log: warn, user: "This request key was already used for different information."}
+  CONSENT_REQUIRED: {http: 422, retry: false, log: info, user: "Your permission is required for that next step."}
+  IDENTITY_NOT_VERIFIED: {http: 422, retry: false, log: info, user: "Verify your contact information to continue."}
+  PRECONDITION_FAILED: {http: 422, retry: false, log: info, user: "More information is required before that action."}
+  INSUFFICIENT_EVIDENCE: {http: 422, retry: false, log: info, user: "There is not enough evidence yet for a reliable conclusion."}
+  RATE_LIMITED: {http: 429, retry: true, log: warn, user: "Too many requests. Try again shortly."}
+  UPLOAD_INVALID: {http: 400, retry: false, log: warn, user: "This file type or size is not accepted."}
+  UPLOAD_NOT_SCANNED: {http: 409, retry: true, log: info, user: "The file is still being checked."}
+  URL_NOT_ALLOWED: {http: 400, retry: false, log: warn, user: "That address cannot be analyzed safely."}
+  MODEL_UNAVAILABLE: {http: 503, retry: true, log: error, user: "The AI service is temporarily unavailable."}
+  KNOWLEDGE_UNAVAILABLE: {http: 503, retry: true, log: error, user: "The knowledge source is temporarily unavailable."}
+  TOOL_TIMEOUT: {http: 504, retry: true, log: error, user: "That action took too long. No success was recorded."}
+  CRM_UNAVAILABLE: {http: 503, retry: true, log: error, user: "Your information was saved, but commercial synchronization is pending."}
+  CALENDAR_UNAVAILABLE: {http: 503, retry: true, log: error, user: "Calendar availability is temporarily unavailable."}
+  SLOT_EXPIRED: {http: 409, retry: true, log: info, user: "That time option expired. Please choose again."}
+  SLOT_UNAVAILABLE: {http: 409, retry: true, log: info, user: "That time is no longer available."}
+  NOTIFICATION_UNAVAILABLE: {http: 503, retry: true, log: error, user: "Your request was saved, but notification is delayed."}
+  INTERNAL_ERROR: {http: 500, retry: false, log: error, user: "Something went wrong. Use the reference if you contact us."}

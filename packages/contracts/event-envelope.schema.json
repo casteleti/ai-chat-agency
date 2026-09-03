@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concierge.example/schemas/event-envelope.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "type", "schemaVersion", "tenantId", "aggregateType", "aggregateId", "occurredAt", "actor", "requestId", "correlationId", "payload", "sensitivity"],
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "type": {"type": "string", "pattern": "^[a-z]+(\\.[a-z_]+)+\\.v[1-9][0-9]*$"},
+    "schemaVersion": {"type": "integer", "minimum": 1},
+    "tenantId": {"type": "string", "format": "uuid"},
+    "aggregateType": {"type": "string"},
+    "aggregateId": {"type": "string"},
+    "occurredAt": {"type": "string", "format": "date-time"},
+    "actor": {"type": "object", "required": ["type", "id"], "properties": {"type": {"enum": ["VISITOR", "USER", "SYSTEM", "AGENT"]}, "id": {"type": "string"}}},
+    "requestId": {"type": "string"},
+    "correlationId": {"type": "string"},
+    "causationId": {"type": ["string", "null"]},
+    "payload": {"type": "object"},
+    "sensitivity": {"enum": ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "RESTRICTED"]}
+  }
+}

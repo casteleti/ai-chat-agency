@@ -1,0 +1,256 @@
+catalogVersion: 1
+policyPipeline:
+  - schema_validation
+  - identity_and_tenant_resolution
+  - resource_authorization
+  - feature_flag
+  - risk_and_confirmation
+  - idempotency
+  - bounded_execution
+  - persisted_result
+  - audit
+defaults:
+  timeoutMs: 8000
+  retries: "0 for writes; up to 2 with jitter for idempotent reads/transient transport"
+  audit: "metadata for reads; before/after and result reference for writes; never secrets"
+tools:
+  - name: searchKnowledge
+    description: Search published, effective, authorized knowledge with hybrid retrieval.
+    caller: [CONCIERGE, NEW_BUSINESS, SUPPORT, KNOWLEDGE]
+    authorization: PUBLIC_READ or AUTHORIZED_PRIVATE_READ with tenant/visibility filters
+    confirmation: never
+    input: "{query:string 2..500, locale, types?:enum[], serviceIds?:uuid[], industry?:string, topK?:1..20}"
+    output: "{results:[{chunkId,documentVersionId,title,excerpt,score,citation,visibility}], degraded:boolean}"
+    idempotency: pure query
+    errors: [KNOWLEDGE_UNAVAILABLE, RATE_LIMITED, VALIDATION_FAILED]
+    audit: private reads and retrieval trace; public aggregate only
+  - name: searchCaseStudies
+    description: Return only approved case records matching problem, industry or service.
+    caller: [NEW_BUSINESS, KNOWLEDGE]
+    authorization: PUBLIC_READ for published public cases
+    confirmation: never
+    input: "{problem?:string,industry?:string,serviceIds?:uuid[],locale,limit?:1..6}"
+    output: "{cases:[{id,title,summary,evidence,serviceIds,citation}]}"
+    idempotency: pure query
+    errors: [KNOWLEDGE_UNAVAILABLE]
+    audit: retrieval trace
+  - name: getService
+    description: Retrieve a canonical published agency service and eligibility metadata.
+    caller: [NEW_BUSINESS, KNOWLEDGE]
+    authorization: PUBLIC_READ
+    confirmation: never
+    input: "{serviceId:uuid,locale}"
+    output: "{id,name,summary,problems,fit,exclusions,pricePolicy?,citation}"
+    idempotency: pure query
+    errors: [RESOURCE_NOT_FOUND, KNOWLEDGE_UNAVAILABLE]
+    audit: retrieval trace
+  - name: analyzeWebsite
+    description: Run a bounded preliminary public URL content/structure inspection.
+    caller: [NEW_BUSINESS]
+    authorization: ANONYMOUS_ANALYSIS with URL policy and feature flag
+    confirmation: explicit user action required
+    input: "{url:https-url,focus:[MESSAGING|CONVERSION|AI_READINESS|STRUCTURE],locale}"
+    output: "{analysisId,status,observations:[{evidence,hypothesis,confidence}],limitations,preliminary:true}"
+    idempotency: "tenant + normalized URL + focus + analyzer version; cache 24h"
+    errors: [URL_NOT_ALLOWED, TOOL_TIMEOUT, CONTENT_UNSUPPORTED, RATE_LIMITED]
+    audit: URL, policy result, fetch metadata; no fetched secrets
+  - name: analyzeFile
+    description: V1 analyze a scanned, authorized attachment using bounded parsers/vision.
+    caller: [NEW_BUSINESS, SUPPORT]
+    authorization: AUTHENTICATED_FILE_READ or explicit anonymous ownership; FILE_UPLOAD_ENABLED
+    confirmation: upload consent and analysis action
+    input: "{attachmentId:uuid,purpose:enum}"
+    output: "{analysisId,status,summary,extractions,citations,limitations}"
+    idempotency: "attachment checksum + purpose + analyzer version"
+    errors: [AUTH_REQUIRED, FORBIDDEN, UPLOAD_NOT_SCANNED, CONTENT_UNSUPPORTED]
+    audit: access and model metadata; content redacted from general logs
+  - name: updateBriefing
+    description: Apply a source-linked, optimistic, user-correctable briefing patch.
+    caller: [NEW_BUSINESS]
+    authorization: conversation owner or authorized staff
+    confirmation: automatic for inferred patch; explicit UI confirmation to mark CONFIRMED when not directly stated
+    input: "{briefingId,expectedVersion,patch:[{field,value,status,confidence,sourceMessageIds}]}"
+    output: "{briefingId,version,changedFields,completeness,openQuestions}"
+    idempotency: "conversation + model run + patch hash"
+    errors: [VERSION_CONFLICT, VALIDATION_FAILED, FORBIDDEN]
+    audit: field-level before/after without duplicating sensitive values in logs
+  - name: generateOpportunityMap
+    description: Validate and persist a preliminary evidence-linked opportunity map proposal.
+    caller: [NEW_BUSINESS]
+    authorization: conversation owner/staff
+    confirmation: no side effect outside conversation; user can correct
+    input: "OpportunityMap schema + briefingVersion"
+    output: "{opportunityMapId,version,items,preliminary:true}"
+    idempotency: "conversation + briefing version + proposal hash"
+    errors: [INSUFFICIENT_EVIDENCE, VALIDATION_FAILED, VERSION_CONFLICT]
+    audit: version and evidence references
+  - name: calculateQualification
+    description: Deterministically calculate score, coverage, confidence, band and action.
+    caller: [NEW_BUSINESS, QUALIFICATION]
+    authorization: conversation/lead owner or staff
+    confirmation: never
+    input: "{subjectId,algorithmVersion,dimensions:[{key,score?,unknown,evidenceIds,confidence}]}"
+    output: "QualificationResult"
+    idempotency: pure calculation then unique snapshot by input hash
+    errors: [INSUFFICIENT_COVERAGE, VALIDATION_FAILED, ALGORITHM_VERSION_UNKNOWN]
+    audit: inputs hash, algorithm, exact output
+  - name: getLead
+    description: Read canonical lead data.
+    caller: [NEW_BUSINESS]
+    authorization: verified subject self-limited view or SALES/ADMIN
+    confirmation: never
+    input: "{leadId?:uuid,verifiedEmailToken?:opaque}"
+    output: "{leadId,status,companyId?,briefingId?,allowedFields}"
+    idempotency: pure query
+    errors: [AUTH_REQUIRED, FORBIDDEN, RESOURCE_NOT_FOUND]
+    audit: privileged read
+  - name: createLead
+    description: Create or resolve a canonical lead after value and verified/confirmed identity.
+    caller: [NEW_BUSINESS]
+    authorization: conversation owner with consent or SALES
+    confirmation: explicit when using contact data for follow-up
+    input: "{conversationId,contact:{name?,email,phone?},company?,consentPurpose,briefingId?}"
+    output: "{leadId,contactId,companyId?,created:boolean,crmSyncStatus}"
+    idempotency: "tenant + normalized verified email + conversation purpose"
+    errors: [CONSENT_REQUIRED, IDENTITY_NOT_VERIFIED, CONFLICT, RATE_LIMITED]
+    audit: consent, actor, canonical IDs, before/after
+  - name: updateLead
+    description: Update allowed canonical lead fields with optimistic concurrency.
+    caller: [NEW_BUSINESS]
+    authorization: subject-limited correction or SALES
+    confirmation: explicit for communication preferences/status
+    input: "{leadId,expectedVersion,patch}"
+    output: "{leadId,version,changedFields,crmSyncStatus}"
+    idempotency: "request idempotency key + patch hash"
+    errors: [VERSION_CONFLICT, FORBIDDEN, VALIDATION_FAILED]
+    audit: before/after
+  - name: createOpportunity
+    description: Create canonical opportunity from a qualified lead and selected initiative.
+    caller: [NEW_BUSINESS]
+    authorization: SALES or policy-approved qualified conversation
+    confirmation: explicit user consent to agency follow-up; no implied contract
+    input: "{leadId,briefingId,qualificationId,initiativeIds,source}"
+    output: "{opportunityId,status,crmSyncStatus}"
+    idempotency: "lead + active opportunity purpose + tenant"
+    errors: [PRECONDITION_FAILED, CONSENT_REQUIRED, CONFLICT]
+    audit: full business write
+  - name: updateOpportunity
+    description: Staff-only canonical opportunity update.
+    caller: [HUMAN_STAFF]
+    authorization: SALES or ADMIN
+    confirmation: UI confirmation for close/disqualify
+    input: "{opportunityId,expectedVersion,patch,reason?}"
+    output: "{opportunityId,version,status,crmSyncStatus}"
+    idempotency: request key + patch hash
+    errors: [FORBIDDEN, VERSION_CONFLICT, INVALID_TRANSITION]
+    audit: before/after and reason
+  - name: getAvailableMeetings
+    description: Read normalized bookable slots in the visitor timezone.
+    caller: [NEW_BUSINESS]
+    authorization: public scheduling intent with rate limit
+    confirmation: never
+    input: "{meetingTypeId,from,to,timeZone,locale}"
+    output: "{slots:[{slotToken,start,end,timeZone}],expiresAt}"
+    idempotency: pure bounded query
+    errors: [CALENDAR_UNAVAILABLE, INVALID_TIMEZONE, RATE_LIMITED]
+    audit: request metadata, no provider token
+  - name: scheduleMeeting
+    description: Atomically reserve a selected server-issued slot and persist booking.
+    caller: [NEW_BUSINESS]
+    authorization: verified contact + eligible meeting intent
+    confirmation: explicit selected slot and attendee details
+    input: "{meetingIntentId,slotToken,contactId,timeZone,idempotencyKey}"
+    output: "{meetingId,status,start,end,timeZone,calendarSyncStatus,reference}"
+    idempotency: required key + intent/slot; provider key where supported
+    errors: [SLOT_EXPIRED, SLOT_UNAVAILABLE, CALENDAR_UNAVAILABLE, IDENTITY_NOT_VERIFIED]
+    audit: booking inputs/result; never calendar credentials
+  - name: createSupportRequest
+    description: Persist a canonical support request and deterministic severity.
+    caller: [SUPPORT]
+    authorization: anonymous owner for safe public fields or authenticated client
+    confirmation: explicit submission/contact consent
+    input: "{conversationId,category,evidence,contactRoute,summary}"
+    output: "{supportRequestId,severity,status,reference,supportSyncStatus}"
+    idempotency: "conversation + active issue fingerprint"
+    errors: [CONSENT_REQUIRED, VALIDATION_FAILED, RATE_LIMITED]
+    audit: severity evidence, write, consent
+  - name: createTicket
+    description: V1 create internal canonical ticket and optional provider sync.
+    caller: [SUPPORT, HUMAN_STAFF]
+    authorization: authenticated authorized client or SUPPORT
+    confirmation: explicit user submission unless staff action
+    input: "{supportRequestId,projectId?,attachments?,idempotencyKey}"
+    output: "{ticketId,status,severity,providerSyncStatus,reference}"
+    idempotency: support request + provider
+    errors: [AUTH_REQUIRED, FORBIDDEN, PRECONDITION_FAILED]
+    audit: full business write
+  - name: updateTicket
+    description: V1 transition/update a ticket using allowed state machine.
+    caller: [SUPPORT, HUMAN_STAFF]
+    authorization: client-limited comment or SUPPORT
+    confirmation: confirm client closure/cancellation; staff uses UI policy
+    input: "{ticketId,expectedVersion,action,payload?}"
+    output: "{ticketId,version,status,slaState}"
+    idempotency: request key + action hash
+    errors: [FORBIDDEN, INVALID_TRANSITION, VERSION_CONFLICT]
+    audit: before/after
+  - name: getTicketStatus
+    description: V1 return authorized ticket status/read model.
+    caller: [SUPPORT]
+    authorization: authenticated membership + ticket resource
+    confirmation: never
+    input: "{ticketId}"
+    output: "{ticketId,status,severity,updatedAt,nextExpectedAction,publicTimeline}"
+    idempotency: pure query
+    errors: [AUTH_REQUIRED, FORBIDDEN, RESOURCE_NOT_FOUND]
+    audit: private read
+  - name: getClient
+    description: V1 resolve client account after authentication without enumeration.
+    caller: [SUPPORT]
+    authorization: authenticated membership or staff
+    confirmation: never
+    input: "{clientId}"
+    output: "{clientId,name,allowedProjectIds,supportEntitlement}"
+    idempotency: pure query
+    errors: [AUTH_REQUIRED, FORBIDDEN, RESOURCE_NOT_FOUND]
+    audit: private read
+  - name: getProject
+    description: V1 retrieve authorized project summary.
+    caller: [SUPPORT]
+    authorization: membership + project scope or staff assignment
+    confirmation: never
+    input: "{projectId}"
+    output: "{projectId,name,status,publicMilestones,authorizedKnowledgeScope}"
+    idempotency: pure query
+    errors: [AUTH_REQUIRED, FORBIDDEN, RESOURCE_NOT_FOUND]
+    audit: private read
+  - name: handoffToHuman
+    description: Persist a versioned handoff package, route and notify a human team.
+    caller: [CONCIERGE, NEW_BUSINESS, SUPPORT]
+    authorization: conversation owner may request; automatic policy escalation allowed
+    confirmation: explicit when sharing contact externally; not required for internal safety escalation with disclosed policy
+    input: "HandoffPackage + idempotencyKey"
+    output: "{handoffId,status,team,reference,expectedResponse?,notificationStatus}"
+    idempotency: conversation + unresolved handoff purpose
+    errors: [CONSENT_REQUIRED, ROUTING_UNAVAILABLE, NOTIFICATION_UNAVAILABLE]
+    audit: package version, route, notification result
+  - name: getCampaignMetrics
+    description: V2 read governed campaign metrics for an authorized client/account.
+    caller: [SUPPORT, BUSINESS_INTELLIGENCE]
+    authorization: authenticated account scope + integration capability
+    confirmation: never
+    input: "{accountId,platform,dateRange,metricSet}"
+    output: "{series,definitions,freshness,sourceIds,limitations}"
+    idempotency: pure/cached query
+    errors: [AUTH_REQUIRED, FORBIDDEN, INTEGRATION_UNAVAILABLE, DATA_STALE]
+    audit: private data read and source lineage
+  - name: getAnalytics
+    description: V2 read authorized first-party analytics with lineage.
+    caller: [SUPPORT, BUSINESS_INTELLIGENCE]
+    authorization: authenticated account scope
+    confirmation: never
+    input: "{propertyId,dateRange,dimensions,metrics,filters?}"
+    output: "{rows,definitions,freshness,sourceIds,limitations}"
+    idempotency: pure/cached query
+    errors: [AUTH_REQUIRED, FORBIDDEN, INTEGRATION_UNAVAILABLE]
+    audit: private read and lineage
