@@ -62,6 +62,46 @@ paths:
       responses:
         '200': {description: Resolved, content: {application/json: {schema: {$ref: '#/components/schemas/ActionResult'}}}}
         '409': {$ref: '#/components/responses/Conflict'}
+  /conversations/{conversationId}/briefing:
+    patch:
+      operationId: patchBriefing
+      summary: Correct owner-allowed briefing fields (optimistic concurrency via If-Match)
+      parameters:
+        - {$ref: '#/components/parameters/ConversationId'}
+        - {$ref: '#/components/parameters/IfMatch'}
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/PatchBriefing'}}}
+      responses:
+        '200': {description: Updated, content: {application/json: {schema: {$ref: '#/components/schemas/Briefing'}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /conversations/{conversationId}/identity/challenge:
+    post:
+      operationId: createIdentityChallenge
+      summary: Send a uniform magic-link/OTP challenge; never confirms whether the destination is already known
+      description: No `contacts` row is created or matched at this step; the destination is held only in `identity_challenges` until a successful verify.
+      x-rate-limit: {perContact: {limit: 5, windowMinutes: 60}, perIp: {limit: 20, windowMinutes: 60}}
+      parameters: [{$ref: '#/components/parameters/ConversationId'}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/IdentityChallengeRequest'}}}
+      responses:
+        '202': {description: Accepted (uniform response regardless of destination match), content: {application/json: {schema: {$ref: '#/components/schemas/IdentityChallengeResult'}}}}
+        '429': {$ref: '#/components/responses/RateLimited'}
+  /conversations/{conversationId}/identity/verify:
+    post:
+      operationId: verifyIdentity
+      summary: Redeem a one-time challenge token; find-or-create the contact only on success, then record consent
+      x-rate-limit: {perChallenge: {maxAttempts: 5, onExceed: INVALIDATE_CHALLENGE_REQUIRE_NEW}}
+      parameters: [{$ref: '#/components/parameters/ConversationId'}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/IdentityVerifyRequest'}}}
+      responses:
+        '200': {description: 'Verified; contact is created/matched by destination only here. Returned contactId is required by POST /meetings.', content: {application/json: {schema: {$ref: '#/components/schemas/VerifiedContact'}}}}
+        '422': {$ref: '#/components/responses/IdentityNotVerified'}
+        '429': {$ref: '#/components/responses/RateLimited'}
   /meeting-types:
     get:
       operationId: listMeetingTypes
@@ -100,6 +140,15 @@ paths:
       responses:
         '202': {description: Accepted, content: {application/json: {schema: {$ref: '#/components/schemas/AsyncReference'}}}}
         '400': {$ref: '#/components/responses/BadRequest'}
+  /website-analyses/{id}:
+    get:
+      operationId: getWebsiteAnalysis
+      summary: Owner-only status/result read; result shape is finalized alongside the generative-ui website_diagnostic contract
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: string, format: uuid}}
+      responses:
+        '200': {description: Owner-safe status/result, content: {application/json: {schema: {$ref: '#/components/schemas/WebsiteAnalysisResult'}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
   /support-requests:
     post:
       operationId: createSupportRequest
@@ -134,12 +183,14 @@ components:
   parameters:
     ConversationId: {name: conversationId, in: path, required: true, schema: {type: string, format: uuid}}
     IdempotencyKey: {name: Idempotency-Key, in: header, required: true, schema: {type: string, minLength: 16, maxLength: 128}}
+    IfMatch: {name: If-Match, in: header, required: true, description: Expected current briefing version (optimistic concurrency), schema: {type: string}}
   responses:
     BadRequest: {description: Invalid request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
     NotFound: {description: Not found, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
     Conflict: {description: Conflict, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
     RateLimited: {description: Rate limited, headers: {Retry-After: {schema: {type: integer}}}, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
     Unavailable: {description: Temporarily unavailable, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
+    IdentityNotVerified: {description: 'Verification token invalid, expired, already used, or the challenge was invalidated after 5 failed attempts (request a new challenge). Maps to error code IDENTITY_NOT_VERIFIED.', content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
   schemas:
     CreateConversation:
       type: object
@@ -166,13 +217,69 @@ components:
       type: object
       required: [messageId, runId, eventsUrl]
       properties: {messageId: {type: string, format: uuid}, runId: {type: string, format: uuid}, eventsUrl: {type: string}}
+    FieldValue:
+      type: object
+      required: [value, status, confidence, sourceMessageIds]
+      description: Mirrors packages/contracts/structured-output.schema.json#/$defs/FieldValue.
+      properties: {value: {}, status: {enum: [UNKNOWN, INFERRED, CONFIRMED, REJECTED]}, confidence: {type: number, minimum: 0, maximum: 1}, sourceMessageIds: {type: array, items: {type: string}}}
+    Briefing:
+      type: object
+      required: [schemaVersion, briefingId, version, fields, openQuestions]
+      description: Mirrors packages/contracts/structured-output.schema.json#/$defs/Briefing (the internal canonical representation; the UI projection is a separate generative-ui descriptor).
+      properties:
+        schemaVersion: {const: 1}
+        briefingId: {type: string, format: uuid}
+        version: {type: integer, minimum: 1}
+        fields: {type: object, additionalProperties: {$ref: '#/components/schemas/FieldValue'}}
+        openQuestions: {type: array, maxItems: 20, items: {type: string, maxLength: 300}}
+    PatchBriefing:
+      type: object
+      additionalProperties: false
+      required: [fields]
+      description: 'Owner-submitted corrections to allowed briefing fields; server re-derives status/confidence/sourceMessageIds for each corrected field (status becomes CONFIRMED). If-Match header carries the expected current version.'
+      properties:
+        fields: {type: object, propertyNames: {pattern: '^[a-z][A-Za-z0-9]{1,80}$'}, additionalProperties: true, minProperties: 1}
+    IdentityChallengeRequest:
+      type: object
+      additionalProperties: false
+      required: [purpose]
+      description: Exactly one of email or phone must be provided (delivery channel for the magic link/OTP).
+      properties:
+        email: {type: string, format: email, maxLength: 320}
+        phone: {type: string, pattern: '^\+[1-9]\d{1,14}$', description: E.164 format.}
+        purpose: {enum: [SAVE, BOOKING]}
+      oneOf:
+        - required: [email]
+        - required: [phone]
+    IdentityChallengeResult:
+      type: object
+      required: [status]
+      description: Always the same shape regardless of whether the email matches an existing contact (uniform response; see G3 anti-enumeration constraint).
+      properties: {status: {const: SENT}}
+    IdentityVerifyRequest:
+      type: object
+      additionalProperties: false
+      required: [token, consent, consentVersion]
+      properties:
+        token: {type: string, minLength: 16, maxLength: 256, description: 'One-time token from the challenge email/SMS; single use, expires 10 minutes after issuance (see docs/database/schema.sql#identity_challenges).'}
+        consent: {type: boolean}
+        consentVersion: {type: string}
+    VerifiedContact:
+      type: object
+      required: [contactId, verifiedAt]
+      properties: {contactId: {type: string, format: uuid}, verifiedAt: {type: string, format: date-time}}
     ActionResult: {type: object, required: [status], properties: {status: {enum: [APPROVED, DENIED, EXECUTED, FAILED]}, resultReference: {type: string}}}
     MeetingType: {type: object, required: [id, name, durationMinutes], properties: {id: {type: string, format: uuid}, name: {type: string}, durationMinutes: {type: integer}}}
     Slot: {type: object, required: [slotToken, start, end, timeZone], properties: {slotToken: {type: string}, start: {type: string, format: date-time}, end: {type: string, format: date-time}, timeZone: {type: string}}}
-    ScheduleMeeting: {type: object, additionalProperties: false, required: [meetingIntentId, slotToken, contactId, timeZone], properties: {meetingIntentId: {type: string, format: uuid}, slotToken: {type: string}, contactId: {type: string, format: uuid}, timeZone: {type: string}}}
+    ScheduleMeeting: {type: object, additionalProperties: false, required: [meetingIntentId, slotToken, contactId, timeZone], properties: {meetingIntentId: {type: string, format: uuid}, slotToken: {type: string}, contactId: {type: string, format: uuid, description: 'Must be a contactId returned by a prior POST /conversations/{id}/identity/verify call for this conversation.'}, timeZone: {type: string}}}
     Meeting: {type: object, required: [id, status, start, end, timeZone, reference], properties: {id: {type: string, format: uuid}, status: {enum: [SCHEDULED, PENDING_SYNC]}, start: {type: string, format: date-time}, end: {type: string, format: date-time}, timeZone: {type: string}, reference: {type: string}}}
     WebsiteAnalysisRequest: {type: object, additionalProperties: false, required: [conversationId, url, focus, consent], properties: {conversationId: {type: string, format: uuid}, url: {type: string, format: uri, maxLength: 2048}, focus: {type: array, minItems: 1, maxItems: 4, items: {enum: [MESSAGING, CONVERSION, AI_READINESS, STRUCTURE]}}, consent: {type: boolean}}}
     AsyncReference: {type: object, required: [id, status], properties: {id: {type: string, format: uuid}, status: {enum: [PENDING, RUNNING, COMPLETED, FAILED]}}}
+    WebsiteAnalysisResult:
+      type: object
+      required: [id, status]
+      description: 'Result payload shape is finalized alongside the generative-ui website_diagnostic contract (packages/contracts/generative-ui.schema.json); result is present only when status is COMPLETED.'
+      properties: {id: {type: string, format: uuid}, status: {enum: [PENDING, RUNNING, COMPLETED, FAILED]}, result: {type: object}}
     SupportRequestInput: {type: object, additionalProperties: false, required: [conversationId, summary, category, consent], properties: {conversationId: {type: string, format: uuid}, summary: {type: string, maxLength: 5000}, category: {type: string}, contactRoute: {type: string, maxLength: 300}, consent: {type: boolean}}}
     SupportRequest: {type: object, required: [id, status, severity, reference], properties: {id: {type: string, format: uuid}, status: {type: string}, severity: {enum: [SEV_1, SEV_2, SEV_3, SEV_4]}, reference: {type: string}}}
     Handoff: {type: object, required: [id, status, reference], properties: {id: {type: string, format: uuid}, status: {enum: [PENDING, ROUTED, HUMAN_ACTIVE, COMPLETED]}, reference: {type: string}, expectedResponse: {type: string}}}
