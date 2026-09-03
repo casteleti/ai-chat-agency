@@ -1,6 +1,6 @@
 # Provider and Channel Interfaces
 
-Provider interfaces accept canonical IDs/models and an execution context containing tenant, actor, request/correlation and idempotency. They return canonical results plus provider reference/freshness, never raw SDK objects.
+Provider interfaces accept canonical IDs/models and an execution context containing actor, request/correlation and idempotency. They return canonical results plus provider reference/freshness, never raw SDK objects.
 
 ```ts
 interface CRMProvider {

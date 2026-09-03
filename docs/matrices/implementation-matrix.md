@@ -4,8 +4,8 @@
 |---|---|---|---|---|---|
 | G0 | monorepo/tooling/CI skeleton | blueprint | root, apps, packages, `.github` | build/unit/boundary | clean frozen build/CI |
 | G1 | executable contracts/config | G0 | contracts/config/OpenAPI | contract/property/drift | generated specs/hash |
-| G2 | DB/tenant/outbox/jobs | G1 | database/events/worker | migration/isolation/idempotency | migration ledger/query plans |
-| G3 | session/auth/consent/authz | G2 | identity/security/API | auth/security/matrix | zero unauthorized/tenant leaks |
+| G2 | DB/outbox/jobs | G1 | database/events/worker | migration/idempotency/repository-RLS | migration ledger/query plans |
+| G3 | session/auth/consent/authz | G2 | identity/security/API | auth/security/matrix/IDOR | zero unauthorized access |
 | G4 | messages/state/SSE/resume | G3 | conversation/API/web | state/concurrency/reconnect/E2E | no lost/duplicate messages |
 | G5 | model/context/orchestrator/tools | G4 | AI/policy/observability | schema/tool/injection/eval | versions/traces/thresholds |
 | G6 | knowledge lifecycle/RAG | G5 | knowledge/worker/pgvector | retrieval/permission/citation/load | recall/grounding/query plans |

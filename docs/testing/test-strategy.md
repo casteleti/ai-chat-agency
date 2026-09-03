@@ -7,7 +7,7 @@
 - Contract: Zod↔JSON Schema/OpenAPI snapshots, provider adapters, events/jobs/UI descriptors, backwards fixtures.
 - E2E: Playwright across public/mobile/admin journeys with deterministic fake AI/provider, plus small live-provider smoke in non-PR protected environment.
 - AI evals: probabilistic behavior against versioned golden datasets; compare baseline, threshold and cost/latency.
-- Security: authz/tenant/property tests, injection corpus, SSRF/upload/webhook/session/CSRF/XSS, scanners.
+- Security: authz/property tests, injection corpus, SSRF/upload/webhook/session/CSRF/XSS, scanners.
 - Accessibility: component axe plus manual and browser E2E.
 - Load/resilience: k6 API/SSE, DB/RAG/queue and controlled provider fault injection.
 
@@ -21,7 +21,7 @@ Tests are colocated for package units/integration where useful; cross-system sui
 | intent | macro accuracy ≥95%; support/new-business recall ≥97% |
 | structured output | valid ≥99%; invalid never persists/executes |
 | tool authorization | 100%; forbidden execution 0 |
-| tenant isolation | 0 cross-tenant results across API/repository/RAG/cache |
+| resource authorization / IDOR | 0 cross-resource results across API/repository/RAG/cache |
 | fabricated case/price/booking/ticket | 0 |
 | qualification | formula exact 100%; labeled band ≥95%; unknown handling 100% |
 | support | SEV-1 recall 100%, severity/category macro F1 ≥0.93 |

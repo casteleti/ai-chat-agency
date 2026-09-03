@@ -3,12 +3,11 @@
   "$id": "https://concierge.example/schemas/event-envelope.v1.json",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "type", "schemaVersion", "tenantId", "aggregateType", "aggregateId", "occurredAt", "actor", "requestId", "correlationId", "payload", "sensitivity"],
+  "required": ["id", "type", "schemaVersion", "aggregateType", "aggregateId", "occurredAt", "actor", "requestId", "correlationId", "payload", "sensitivity"],
   "properties": {
     "id": {"type": "string", "format": "uuid"},
     "type": {"type": "string", "pattern": "^[a-z]+(\\.[a-z_]+)+\\.v[1-9][0-9]*$"},
     "schemaVersion": {"type": "integer", "minimum": 1},
-    "tenantId": {"type": "string", "format": "uuid"},
     "aggregateType": {"type": "string"},
     "aggregateId": {"type": "string"},
     "occurredAt": {"type": "string", "format": "date-time"},

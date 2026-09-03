@@ -2,10 +2,6 @@
 
 ```mermaid
 erDiagram
-  TENANT ||--o{ VISITOR : owns
-  TENANT ||--o{ USER : owns
-  TENANT ||--o{ COMPANY : owns
-  TENANT ||--o{ CONVERSATION : owns
   VISITOR ||--o{ VISITOR_SESSION : uses
   VISITOR ||--o{ CONVERSATION : starts
   COMPANY ||--o{ CONTACT : employs
@@ -31,10 +27,8 @@ erDiagram
   CONVERSATION ||--o{ ATTACHMENT : includes
   KNOWLEDGE_DOCUMENT ||--o{ KNOWLEDGE_VERSION : versions
   KNOWLEDGE_VERSION ||--o{ KNOWLEDGE_CHUNK : contains
-  TENANT ||--o{ INTEGRATION : configures
   INTEGRATION ||--o{ EXTERNAL_MAPPING : maps
   CONVERSATION ||--o{ PRODUCT_EVENT : measures
-  TENANT ||--o{ AUDIT_LOG : audits
 ```
 
-The simplified ERD omits auth library tables, outbox receipts, consent links and several versioning relations for readability. `schema.sql` is authoritative for table-level design. All shown tenant-owned relationships are implemented with composite `(tenant_id,id)` foreign keys where practical.
+The simplified ERD omits auth library tables, outbox receipts, consent links and several versioning relations for readability. `schema.sql` is authoritative for table-level design.

@@ -12,7 +12,7 @@ Default deny. User messages, page context, fetched websites, uploads, RAG docume
 
 - TLS at edge and origin; HSTS after domain validation.
 - HttpOnly Secure SameSite cookies; CSRF protection for cookie-authenticated mutations; session rotation and revocation.
-- Tenant and resource authorization on every private query/action.
+- Resource authorization on every private query/action.
 - Zod/JSON Schema validation, body/stream limits, parameterized queries, output encoding, CSP, and no unsafe HTML.
 - Tool policy pipeline with permission, risk, confirmation, idempotency, timeout, audit, and least-privilege provider credentials.
 - SSRF allow/deny resolution for website analysis; no private/link-local/loopback IPs or redirect escapes.
@@ -25,7 +25,7 @@ Default deny. User messages, page context, fetched websites, uploads, RAG docume
 
 | Severity | Example | Initial response target |
 |---|---|---|
-| Critical | cross-tenant disclosure, auth bypass, secret compromise, arbitrary privileged tool execution | 30 min |
+| Critical | unauthorized private-data disclosure, auth bypass, secret compromise, arbitrary privileged tool execution | 30 min |
 | High | stored XSS, SSRF to sensitive network, broad PII exposure | 4 h |
 | Medium | limited CSRF, rate-limit bypass, low-scope data exposure | 2 business days |
 | Low | hardening issue without practical exploit | 5 business days |

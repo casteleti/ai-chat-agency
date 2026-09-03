@@ -22,7 +22,7 @@ AI cannot downgrade hard severity. No client enumeration/private lookup. No secr
 
 ## Tests/Commands
 
-Category/severity table/property, SEV-1 override, private question boundary, billing/security/angry/human, knowledge grounded/abstain, duplicate issue, provider absent, tenant/SLA timezone, golden eval and E2E. `test:unit test:evals test:security test:e2e verify`.
+Category/severity table/property, SEV-1 override, private question boundary, billing/security/angry/human, knowledge grounded/abstain, duplicate issue, provider absent, SLA timezone, golden eval and E2E. `test:unit test:evals test:security test:e2e verify`.
 
 ## Acceptance Criteria
 

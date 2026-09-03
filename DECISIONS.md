@@ -18,7 +18,8 @@ ADRs are authoritative; this is the quick index.
 | ADR-012 | Schema-driven registered Generative UI | Accepted |
 | ADR-013 | Internal CRM model and `CRMProvider` adapters | Accepted |
 | ADR-014 | MVP support public-only; authenticated support in V1 | Accepted |
-| ADR-015 | Tenant-ready shared schema without SaaS operations | Accepted |
+| ADR-015 | Tenant-ready shared schema without SaaS operations | Superseded by ADR-017 |
+| ADR-017 | Single-tenant by decision; multi-tenancy removed | Accepted |
 
 ## Product decisions
 
@@ -33,7 +34,7 @@ ADRs are authoritative; this is the quick index.
 | WhatsApp | Not primary CTA; continuity/handoff in V1 |
 | Website audit | URL-only, SSRF-safe, preliminary, bounded |
 | Pricing/cases | Only from approved knowledge/tool records |
-| Productization | Generic core and tenant IDs now; provisioning/billing/white-label later |
+| Productization | Not planned (ADR-017); single-tenant, no provisioning/billing/white-label |
 
 ## Change rule
 

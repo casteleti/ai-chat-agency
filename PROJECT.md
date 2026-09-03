@@ -111,7 +111,7 @@ North-star metric: **Meaningful Business Conversations (MBC)** — a conversatio
 
 ## Success criteria
 
-MVP release is blocked unless: intent accuracy ≥95% on the approved golden set; tool authorization pass rate 100%; cross-tenant leaks 0; fabricated case and price rate 0; structured output validity ≥99%; booking timezone error rate 0; WCAG 2.2 AA critical/serious violations 0; and all G0–G17 gates provide completion evidence.
+MVP release is blocked unless: intent accuracy ≥95% on the approved golden set; tool authorization pass rate 100%; fabricated case and price rate 0; structured output validity ≥99%; booking timezone error rate 0; WCAG 2.2 AA critical/serious violations 0; and all G0–G17 gates provide completion evidence.
 
 Commercial targets are baselines, not release gates: chat open-to-start ≥35%, MBC/start ≥35%, qualified conversation/MBC ≥20%, meeting/qualified ≥25%. Revisit after four weeks or 500 non-test conversations.
 
@@ -120,6 +120,6 @@ Commercial targets are baselines, not release gates: chat open-to-start ≥35%, 
 - Core generic: conversations, state, policies, tools, knowledge, briefing, qualification engine, Generative UI contracts, providers, telemetry.
 - Agency specific: brand voice, services, cases, lead scoring weights, support categories, SLAs, prompts, knowledge content.
 - Integration specific: CRM, calendar, email, support and future channel adapters.
-- Client configuration: tenant settings, identity, visual tokens, enabled capabilities, retention, routing.
+- Client configuration: agency settings, identity, visual tokens, enabled capabilities, retention, routing.
 
 Any change to MVP/V1/V2 boundaries requires an update here and a decision entry; code or tickets do not override this file.

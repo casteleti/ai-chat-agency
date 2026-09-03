@@ -8,7 +8,7 @@
 | fabricated case/price/result | Medium | Critical | canonical tools/citations, deterministic assertion 0 | AI/Knowledge |
 | qualification bias/false precision | Medium | High | unknown coverage, explained rules, protected fields excluded, human review | Product/Legal |
 | prompt/knowledge injection | High | Critical | trust zones, tool policy, injection suite | Security/AI |
-| unauthorized/cross-tenant data | Low | Critical | TenantContext/composite FK/RLS/matrix/canary | Security/Data |
+| unauthorized data access | Low | Critical | resource-scoped repository queries/RLS/matrix/canary | Security/Data |
 | client impersonation | Medium | Critical | uniform verified auth/resource membership | Identity/Security |
 | tool side-effect abuse | Medium | Critical | schema/policy/confirmation/idempotency/audit | Security/Domain |
 | SSRF/malicious file | Medium | Critical | constrained fetch/quarantine/scan/sandbox; uploads V1 | Security/Infra |

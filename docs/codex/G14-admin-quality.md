@@ -22,7 +22,7 @@ Same API/policies as other clients; no direct DB/vendor; private/privileged read
 
 ## Tests/Commands
 
-Role/resource matrix each page/action, tenant/filter/export, publish failure/rollback/new version, concurrent review, index status, prompt eval gate, audit, pagination/large transcript, a11y/responsive. `test:integration test:e2e test:a11y verify`.
+Role/resource matrix each page/action, filter/export, publish failure/rollback/new version, concurrent review, index status, prompt eval gate, audit, pagination/large transcript, a11y/responsive. `test:integration test:e2e test:a11y verify`.
 
 ## Acceptance Criteria
 

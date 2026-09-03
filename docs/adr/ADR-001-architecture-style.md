@@ -4,7 +4,7 @@ Status: Accepted — 2026-09-02
 
 ## Context
 
-The product has several domains and asynchronous integrations but begins with one team, one tenant, modest traffic, and shared transactional workflows. Microservices would add distributed state, deployments, tracing, and failure modes before independent scaling or ownership exists.
+The product has several domains and asynchronous integrations but begins with one team, modest traffic, and shared transactional workflows. Microservices would add distributed state, deployments, tracing, and failure modes before independent scaling or ownership exists.
 
 ## Decision
 

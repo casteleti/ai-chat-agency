@@ -2,7 +2,7 @@
 
 One `packages/config` module defines Zod schemas for `webPublic`, `api`, `worker`, `admin`, and test config. It reads environment once at process start, trims/normalizes, rejects unknown critical enum values, validates URLs/origins/timezones/key lengths and fails fast with variable names but never values. Browser exposure requires explicit `NEXT_PUBLIC_*` mapping and build-time review.
 
-Precedence: hard-coded safe defaults (non-secret) < checked-in environment profile < runtime environment/secrets < tenant database settings/flags for allowed keys. A tenant flag cannot enable a capability whose global operational flag is off. Secrets never reside in tenant JSON.
+Precedence: hard-coded safe defaults (non-secret) < checked-in environment profile < runtime environment/secrets < database settings/flags for allowed keys. A database flag cannot enable a capability whose global operational flag is off. Secrets never reside in flag JSON.
 
 ## Flags
 
@@ -20,7 +20,7 @@ Precedence: hard-coded safe defaults (non-secret) < checked-in environment profi
 | `VOICE_ENABLED` | false | no microphone/media permission/UI |
 | `WHATSAPP_ENABLED` | false | no adapter/webhook/send |
 
-Flags have owner, reason, created/expiry review, environment and tenant scope, audit and metrics. Security/authorization is never only a flag. Remove stale flags within two releases after full rollout.
+Flags have owner, reason, created/expiry review, environment scope, audit and metrics. Security/authorization is never only a flag. Remove stale flags within two releases after full rollout.
 
 ## Secret lifecycle
 

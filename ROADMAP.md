@@ -4,7 +4,7 @@ Release labels describe product value; implementation gates describe dependency 
 
 ## MVP
 
-G0–G17 deliver the public commercial concierge, public/basic support handoff, admin review, secure production foundation, and measurement. Launch is intentionally narrow: Portuguese/English web, one agency tenant, one CRM adapter, one calendar adapter, internal support/handoff, and curated knowledge.
+G0–G17 deliver the public commercial concierge, public/basic support handoff, admin review, secure production foundation, and measurement. Launch is intentionally narrow: Portuguese/English web, one CRM adapter, one calendar adapter, internal support/handoff, and curated knowledge.
 
 ## V1
 
@@ -21,7 +21,7 @@ Governed business intelligence: ads/analytics/search/CRM read adapters, cross-so
 | G0 | Repository foundation | Blueprint |
 | G1 | Contracts and configuration | G0 |
 | G2 | Database and outbox | G1 |
-| G3 | Identity, consent, tenant policy | G2 |
+| G3 | Identity, consent, resource policy | G2 |
 | G4 | Conversation API and streaming | G3 |
 | G5 | AI gateway, prompts, context, policies | G4 |
 | G6 | Knowledge ingestion and RAG | G5 |

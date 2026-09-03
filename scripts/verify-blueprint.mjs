@@ -18,9 +18,12 @@ const failures = [];
 const files = [];
 const directories = new Set();
 
+const excludedDirs = new Set(['.git', 'node_modules']);
+
 async function walk(dir) {
   directories.add(dir);
   for (const entry of await readdir(dir, { withFileTypes: true })) {
+    if (entry.isDirectory() && excludedDirs.has(entry.name)) continue;
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) await walk(full);
     else if (entry.isFile()) files.push(full);
@@ -57,7 +60,7 @@ for (const full of files) {
 
 const adrCount = files.filter((f) => /docs\/adr\/ADR-\d+/.test(path.relative(root, f))).length;
 const gateCount = files.filter((f) => /docs\/codex\/G\d+-.+\.md$/.test(path.relative(root, f))).length;
-if (adrCount !== 15) failures.push(`Expected 15 ADRs, found ${adrCount}`);
+if (adrCount !== 16) failures.push(`Expected 16 ADRs, found ${adrCount}`);
 if (gateCount !== 18) failures.push(`Expected 18 gates, found ${gateCount}`);
 
 const jsonl = await readFile(path.join(root, 'tests/fixtures/golden-conversations.jsonl'), 'utf8');

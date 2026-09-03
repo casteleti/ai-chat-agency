@@ -14,7 +14,7 @@
 
 ## Design token contract
 
-Tokens are CSS custom properties mapped from the main website, never hard-coded tenant identity in components.
+Tokens are CSS custom properties mapped from the main website, never hard-coded brand identity in components.
 
 - Color: canvas/surface/elevated, text strong/muted/inverse, border, accent, success/warning/danger/info, focus, scrim; each has light/dark/contrast values.
 - Typography: display, heading, body, label, mono families; fluid sizes, weights, line heights, tracking.

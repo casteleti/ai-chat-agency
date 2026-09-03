@@ -10,4 +10,4 @@ Preconditions: approved commit/images, all release gates green, staging exact im
 6. Enable flags in planned increments; watch 5xx, latency, schema/tool failures, queue, DB, cost, funnel for 30 minutes.
 7. Record release evidence and announce completion.
 
-Abort/rollback on readiness failure, migration error, security/tenant anomaly, >2% 5xx, sustained SLO burn, duplicate write, schema failure >1%, or cost breaker. Use rollback runbook; never improvise destructive DB rollback.
+Abort/rollback on readiness failure, migration error, security anomaly, >2% 5xx, sustained SLO burn, duplicate write, schema failure >1%, or cost breaker. Use rollback runbook; never improvise destructive DB rollback.

@@ -23,7 +23,7 @@ flowchart TB
 - Web owns presentation/session UX, never business authority.
 - API owns identity resolution, commands, queries, orchestration, authorization and SSE.
 - Orchestrator is a state-aware application service, not a free-running agent loop.
-- Policy engine computes capabilities from tenant, actor, resource, state and feature flags.
+- Policy engine computes capabilities from actor, resource, state and feature flags.
 - Context engine returns ordered typed blocks with provenance, sensitivity and token budget.
 - Model gateway never receives provider credentials from callers and never executes tools directly.
 - Tool executor is the only route to side effects.

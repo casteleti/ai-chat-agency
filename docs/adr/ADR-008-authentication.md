@@ -8,7 +8,7 @@ Public prospects need low-friction anonymous chat; staff and V1 clients need sec
 
 ## Decision
 
-Use an HttpOnly signed cookie referencing a server-side anonymous visitor session. Use Better Auth for identified users with short magic links/OTP, secure session cookies, rotation/revocation, and tenant memberships. Anonymous identity never grants private client access.
+Use an HttpOnly signed cookie referencing a server-side anonymous visitor session. Use Better Auth for identified users with short magic links/OTP, secure session cookies, rotation/revocation, and staff memberships. Anonymous identity never grants private client access.
 
 ## Alternatives
 

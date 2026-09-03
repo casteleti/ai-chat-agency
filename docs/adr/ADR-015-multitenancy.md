@@ -1,6 +1,8 @@
 # ADR-015 — Tenant-Ready Shared Schema
 
-Status: Accepted — 2026-09-02
+Status: Superseded by ADR-017 — 2026-09-03 (originally Accepted — 2026-09-02)
+
+Superseded: Daksa confirmed there is no intention to sell this system to third parties; it is single-use internal software. See [ADR-017](./ADR-017-single-tenant-confirmation.md) for the reversal and its consequences. The content below is preserved as historical record of the original decision and is no longer in effect.
 
 ## Context
 
