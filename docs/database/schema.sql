@@ -341,6 +341,11 @@ CREATE TABLE product_events (
   schema_version int NOT NULL, occurred_at timestamptz NOT NULL, anonymous_subject_hash text,
   user_id uuid, conversation_id uuid, properties jsonb NOT NULL, consent_scope text NOT NULL
 );
+-- conversation_id is intentionally nullable with NO foreign key: this table has its own 13-month
+-- retention clock (docs/database/data-retention.md), decoupled from the referenced conversation's
+-- 24-month clock. Do not add `FOREIGN KEY (tenant_id,conversation_id) REFERENCES conversations(...)`
+-- here -- it would force telemetry purge to wait on (or block) the parent conversation's retention.
+-- At purge time, user_id/conversation_id/anonymous_subject_hash are nulled in place, not FK-cascaded.
 CREATE TABLE feedback (
   id uuid PRIMARY KEY, tenant_id uuid NOT NULL REFERENCES tenants(id), conversation_id uuid,
   message_id uuid, rating smallint, reason_code text, comment text,
