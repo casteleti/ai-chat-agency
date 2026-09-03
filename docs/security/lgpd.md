@@ -17,7 +17,7 @@ Anonymous use remains possible. Ask business context before personal data. Budge
 
 ## Rights
 
-Provide accessible privacy/contact route for confirmation/access, correction, portability/export, deletion/anonymization, processing information, consent withdrawal and review of consequential automated processing. Qualification is advisory, explained and does not deny a legal right/service; users may request human review.
+Provide accessible privacy/contact route for confirmation/access, correction, portability/export, deletion/anonymization, processing information, consent withdrawal and review of consequential automated processing. Qualification is advisory, explained and does not deny a legal right/service; users may request human review. Who may request vs. execute deletion/anonymization is defined by the `D` verb in `docs/security/authorization-matrix.md`: data subjects and Support may only request it; execution is Admin/Owner only, privacy-process-gated and audited. Response deadline: 15 business days from a verified request (`docs/database/data-retention.md`) -- reference value, requires counsel confirmation before production.
 
 ## Processors/transfers
 

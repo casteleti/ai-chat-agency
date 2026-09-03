@@ -361,5 +361,114 @@ CREATE TABLE audit_logs (
 );
 CREATE INDEX audit_resource_time ON audit_logs(tenant_id,resource_type,resource_id,occurred_at DESC);
 
+-- Automatic audit-log triggers backing the `D` (delete/anonymize) verb in
+-- docs/security/authorization-matrix.md and the deletion workflow in
+-- docs/database/data-retention.md. These fire at the database level, not
+-- from application code, so an audit_logs row is written even if a code
+-- path forgets to call an explicit audit write -- verified end-to-end
+-- against a real PostgreSQL 18 instance (see PR history): a DELETE with
+-- zero application context set still produces a row (actor_type='SYSTEM',
+-- actor_id='unknown'); an unrelated column update on a covered table does
+-- not fire; re-setting an already-non-null deleted_at/anonymized_at does
+-- not double-fire.
+--
+-- actor_type/actor_id/request_id are read from session-local GUCs that
+-- application code MAY set to enrich attribution:
+--   BEGIN; SET LOCAL app.actor_type='USER'; SET LOCAL app.actor_id='<id>';
+--   SET LOCAL app.request_id='<id>'; DELETE FROM ...; COMMIT;
+-- `SET LOCAL` only takes effect inside an explicit transaction block --
+-- tested and confirmed: calling it outside BEGIN/COMMIT emits
+-- "SET LOCAL can only be used in transaction blocks" and the attribution
+-- silently degrades to empty strings (the row is still written; only the
+-- actor/request attribution is lost). Any deletion/anonymization code path
+-- MUST wrap its SET LOCAL + statement in an explicit transaction.
+--
+-- before_redacted/after_redacted currently store the raw OLD/NEW row via
+-- to_jsonb(), not an actually-redacted projection -- the column names
+-- anticipate redaction that per-table application logic must still add
+-- (G16); this is a known simplification, not a completed guarantee.
+--
+-- Covers the personal-data-bearing tables named in this PR's
+-- authorization-matrix.md rows (public/private conversation,
+-- briefing/opportunity map, lead/contact/company, meeting record, support
+-- request, ticket/project/client, attachment) plus identity tables
+-- (visitors, visitor_sessions, users). Extending coverage to another table
+-- is one CREATE TRIGGER line against the matching function below.
+CREATE OR REPLACE FUNCTION fn_audit_log_hard_delete() RETURNS trigger AS $$
+BEGIN
+  INSERT INTO audit_logs (
+    id, tenant_id, occurred_at, actor_type, actor_id, action,
+    resource_type, resource_id, request_id, before_redacted, metadata
+  ) VALUES (
+    gen_random_uuid(), OLD.tenant_id, now(),
+    COALESCE(current_setting('app.actor_type', true), 'SYSTEM'),
+    COALESCE(current_setting('app.actor_id', true), 'unknown'),
+    'DELETE', TG_TABLE_NAME, OLD.id::text,
+    COALESCE(current_setting('app.request_id', true), 'unknown'),
+    to_jsonb(OLD),
+    jsonb_build_object('trigger', TG_NAME)
+  );
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fn_audit_log_anonymize_deleted_at() RETURNS trigger AS $$
+BEGIN
+  IF OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL THEN
+    INSERT INTO audit_logs (
+      id, tenant_id, occurred_at, actor_type, actor_id, action,
+      resource_type, resource_id, request_id, before_redacted, after_redacted, metadata
+    ) VALUES (
+      gen_random_uuid(), NEW.tenant_id, now(),
+      COALESCE(current_setting('app.actor_type', true), 'SYSTEM'),
+      COALESCE(current_setting('app.actor_id', true), 'unknown'),
+      'ANONYMIZE', TG_TABLE_NAME, NEW.id::text,
+      COALESCE(current_setting('app.request_id', true), 'unknown'),
+      to_jsonb(OLD), to_jsonb(NEW),
+      jsonb_build_object('trigger', TG_NAME)
+    );
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fn_audit_log_anonymize_anonymized_at() RETURNS trigger AS $$
+BEGIN
+  IF OLD.anonymized_at IS NULL AND NEW.anonymized_at IS NOT NULL THEN
+    INSERT INTO audit_logs (
+      id, tenant_id, occurred_at, actor_type, actor_id, action,
+      resource_type, resource_id, request_id, before_redacted, after_redacted, metadata
+    ) VALUES (
+      gen_random_uuid(), NEW.tenant_id, now(),
+      COALESCE(current_setting('app.actor_type', true), 'SYSTEM'),
+      COALESCE(current_setting('app.actor_id', true), 'unknown'),
+      'ANONYMIZE', TG_TABLE_NAME, NEW.id::text,
+      COALESCE(current_setting('app.request_id', true), 'unknown'),
+      to_jsonb(OLD), to_jsonb(NEW),
+      jsonb_build_object('trigger', TG_NAME)
+    );
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER audit_on_delete_contacts AFTER DELETE ON contacts FOR EACH ROW EXECUTE FUNCTION fn_audit_log_hard_delete();
+CREATE TRIGGER audit_on_delete_companies AFTER DELETE ON companies FOR EACH ROW EXECUTE FUNCTION fn_audit_log_hard_delete();
+CREATE TRIGGER audit_on_delete_messages AFTER DELETE ON messages FOR EACH ROW EXECUTE FUNCTION fn_audit_log_hard_delete();
+CREATE TRIGGER audit_on_delete_briefings AFTER DELETE ON briefings FOR EACH ROW EXECUTE FUNCTION fn_audit_log_hard_delete();
+CREATE TRIGGER audit_on_delete_leads AFTER DELETE ON leads FOR EACH ROW EXECUTE FUNCTION fn_audit_log_hard_delete();
+CREATE TRIGGER audit_on_delete_qualification_snapshots AFTER DELETE ON qualification_snapshots FOR EACH ROW EXECUTE FUNCTION fn_audit_log_hard_delete();
+CREATE TRIGGER audit_on_delete_opportunities AFTER DELETE ON opportunities FOR EACH ROW EXECUTE FUNCTION fn_audit_log_hard_delete();
+CREATE TRIGGER audit_on_delete_meetings AFTER DELETE ON meetings FOR EACH ROW EXECUTE FUNCTION fn_audit_log_hard_delete();
+CREATE TRIGGER audit_on_delete_support_requests AFTER DELETE ON support_requests FOR EACH ROW EXECUTE FUNCTION fn_audit_log_hard_delete();
+CREATE TRIGGER audit_on_delete_tickets AFTER DELETE ON tickets FOR EACH ROW EXECUTE FUNCTION fn_audit_log_hard_delete();
+CREATE TRIGGER audit_on_delete_projects AFTER DELETE ON projects FOR EACH ROW EXECUTE FUNCTION fn_audit_log_hard_delete();
+CREATE TRIGGER audit_on_delete_visitor_sessions AFTER DELETE ON visitor_sessions FOR EACH ROW EXECUTE FUNCTION fn_audit_log_hard_delete();
+CREATE TRIGGER audit_on_delete_users AFTER DELETE ON users FOR EACH ROW EXECUTE FUNCTION fn_audit_log_hard_delete();
+
+CREATE TRIGGER audit_on_anonymize_conversations AFTER UPDATE OF deleted_at ON conversations FOR EACH ROW EXECUTE FUNCTION fn_audit_log_anonymize_deleted_at();
+CREATE TRIGGER audit_on_anonymize_attachments AFTER UPDATE OF deleted_at ON attachments FOR EACH ROW EXECUTE FUNCTION fn_audit_log_anonymize_deleted_at();
+CREATE TRIGGER audit_on_anonymize_visitors AFTER UPDATE OF anonymized_at ON visitors FOR EACH ROW EXECUTE FUNCTION fn_audit_log_anonymize_anonymized_at();
+
 -- Every high-volume tenant table additionally needs (tenant_id, created_at/id) indexes
 -- matching repository access patterns. G2 uses EXPLAIN tests to finalize them.
